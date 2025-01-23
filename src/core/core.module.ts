@@ -1,0 +1,57 @@
+import { Module, UnprocessableEntityException, ValidationPipe } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import Joi from 'joi'
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
+import { MongooseModule } from '@nestjs/mongoose'
+import { database, environment, port, token } from 'config'
+import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
+import { JwtAuthGuard } from 'core/guards/auth/jwt-auth.guard'
+import { ValidationError } from 'class-validator'
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [environment, port, database, token],
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
+        PORT: Joi.number().port().required(),
+        DATABASE_URI: Joi.string().required()
+      })
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('databaseUri')
+      }),
+      inject: [ConfigService]
+    })
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformResponseInterceptor
+    },
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        stopAtFirstError: true,
+        exceptionFactory: (validationErrors: ValidationError[] = []) => {
+          return new UnprocessableEntityException(
+            validationErrors.map((error) => ({
+              field: error.property,
+              message: Object.values(error.constraints).join(', ')
+            }))
+          )
+        }
+      })
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard
+    }
+  ],
+  exports: []
+})
+export class CoreModule {}
