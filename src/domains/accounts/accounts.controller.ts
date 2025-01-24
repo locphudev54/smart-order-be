@@ -15,6 +15,7 @@ export class AccountsController {
     return this.accountsService.create(createAccountDto)
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.accountsService.findAll()

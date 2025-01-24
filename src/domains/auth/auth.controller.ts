@@ -1,9 +1,8 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
+import { Body, Controller, Patch, Post, Request, UseGuards } from '@nestjs/common'
 import { Account } from 'core/decorators/account.decorator'
 import { Public } from 'core/decorators/public.decorator'
 import { LocalAuthGuard } from 'core/guards/auth/local-auth.guard'
-import { IAccountType } from 'core/types/account.type'
-import { AccountsController } from 'domains/accounts/accounts.controller'
+import { AccountType } from 'core/types/type'
 import { AuthService } from 'domains/auth/auth.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
@@ -18,7 +17,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req) {
-    return this.authService.login(req.user)
+    return this.authService.login(req.user as AccountType)
   }
 
   @Public()
@@ -34,13 +33,13 @@ export class AuthController {
   }
 
   @Public()
-  @Post('forgot-password')
-  forgotPassword(@Body() changePasswordDto: ForgotPasswordtDto, @Account() account: IAccountType) {
-    return this.authService.forgotPassword(changePasswordDto)
+  @Patch('forgot-password')
+  forgotPassword(@Body() forgotPasswordtDto: ForgotPasswordtDto) {
+    return this.authService.forgotPassword(forgotPasswordtDto)
   }
 
-  @Post('change-password')
-  changePassword(@Body() changePasswordDto: ChangePasswordDto, @Account() account: IAccountType) {
+  @Patch('change-password')
+  changePassword(@Body() changePasswordDto: ChangePasswordDto, @Account() account: AccountType) {
     return this.authService.changePassword(changePasswordDto, account)
   }
 }

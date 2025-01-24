@@ -7,9 +7,9 @@ export class ChangePasswordDto {
   @IsNotEmpty({ message: 'olPassword không được bỏ trống' })
   oldPassword: string
 
-  @MaxLength(40, { message: 'password không được vượt quá 40 kí tự' })
-  @MinLength(6, { message: 'ppssword phải có ít nhất 6 kí tự' })
-  @IsString({ message: 'password phải là định dạng string' })
-  @IsNotEmpty({ message: 'password không được bỏ trống' })
-  password: string
+  @MaxLength(40, { message: 'newPassword không được vượt quá 40 kí tự' })
+  @MinLength(6, { message: 'newPassword phải có ít nhất 6 kí tự' })
+  @IsString({ message: 'newPassword phải là định dạng string' })
+  @IsNotEmpty({ message: 'newPassword không được bỏ trống' })
+  newPassword: string
 }

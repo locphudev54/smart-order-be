@@ -1,11 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Role } from 'core/constants/enum'
-import { HydratedDocument, Types } from 'mongoose'
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
 
 @Schema({ timestamps: true })
 export class Account {
+  @Prop({ type: SchemaTypes.ObjectId })
+  _id: Types.ObjectId
+
   @Prop({ required: true })
   email: string
 

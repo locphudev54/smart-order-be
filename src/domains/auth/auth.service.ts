@@ -1,14 +1,20 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  UnprocessableEntityException
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { JwtService } from '@nestjs/jwt'
+import { JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { Role } from 'core/constants/enum'
-import { IAccountType } from 'core/types/account.type'
-import { IAuthTokenPayload, IAuthTokenType } from 'core/types/auth.type'
+import { AccountType, AuthTokenPayload } from 'core/types/type'
 import { AccountsService } from 'domains/accounts/accounts.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
+import mongoose from 'mongoose'
 import ms, { StringValue } from 'ms'
 
 @Injectable()
@@ -30,9 +36,8 @@ export class AuthService {
   /**
    * @param account chính là req.user từ LocalStrategy ~ kết quả trả về của hàm validateAccount()
    */
-  async login(account: IAccountType) {
-    const payload: IAuthTokenPayload = { email: account.email, fullName: account.fullName, role: account.role }
-
+  async login(account: AccountType) {
+    const payload = account
     const [accessToken, refreshToken] = await Promise.all([
       this.signAccessToken(payload),
       this.signRefreshToken(payload)
@@ -42,60 +47,64 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      account: {
-        email: account.email,
-        fullName: account.fullName,
-        avatarUrl: account.avatarUrl,
-        role: account.role
-      }
+      account
     }
   }
 
   async register(registerAccountDto: RegisterAccountDto) {
     const { email, fullName, password } = registerAccountDto
 
+    const accountId = new mongoose.Types.ObjectId()
     const [accessToken, refreshToken] = await Promise.all([
       this.signAccessToken({
+        _id: accountId,
         email,
         fullName,
-        role: Role.Customer
+        role: Role.Customer,
+        avatarUrl: ''
       }),
       this.signRefreshToken({
+        _id: accountId,
         email,
         fullName,
-        role: Role.Customer
+        role: Role.Customer,
+        avatarUrl: ''
       })
     ])
-    const newAccount = await this.accountsService.create({ email, password, fullName, refreshToken })
+    const account = await this.accountsService.create({
+      email,
+      password,
+      fullName,
+      refreshToken,
+      _id: accountId.toString()
+    })
 
     return {
       accessToken,
       refreshToken,
-      account: {
-        email: newAccount.email,
-        fullName: newAccount.fullName,
-        avatarUrl: newAccount.avatarUrl,
-        role: newAccount.role
-      }
+      account
     }
   }
 
   async refreshToken(refreshTokenDto: RefreshTokenDto) {
     try {
-      if (!refreshTokenDto.refreshToken) {
-        throw new UnauthorizedException('Refresh token không hợp lệ')
-      }
-
       const account = await this.accountsService.findByRefreshToken(refreshTokenDto.refreshToken)
-      if (!account) {
+      if (!account || !refreshTokenDto.refreshToken) {
         throw new UnauthorizedException('Refresh token không hợp lệ')
       }
 
-      const decodedOldRefreshToken = await this.jwtService.verifyAsync<IAuthTokenType>(refreshTokenDto.refreshToken, {
+      const decodedOldRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshTokenDto.refreshToken, {
         secret: this.configService.get<string>('refreshToken.secret')
       })
 
-      const payload: IAuthTokenPayload = { email: account.email, fullName: account.fullName, role: account.role }
+      const payload: AccountType = {
+        _id: account._id,
+        email: account.email,
+        fullName: account.fullName,
+        avatarUrl: account.avatarUrl,
+        role: account.role
+      }
+
       const [accessToken, refreshToken] = await Promise.all([
         this.signAccessToken(payload),
         this.signRefreshToken(payload, decodedOldRefreshToken.exp)
@@ -105,10 +114,13 @@ export class AuthService {
       return {
         accessToken,
         refreshToken,
-        account
+        account: payload
       }
     } catch (error) {
-      throw new UnauthorizedException('Refresh token hết hạn')
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Refresh token hết hạn')
+      }
+      throw error
     }
   }
 
@@ -116,21 +128,46 @@ export class AuthService {
     const { email, password } = forgotPasswordDto
     const account = await this.accountsService.findByEmail(email)
     if (!account) {
-      throw new BadRequestException('Email không tồn tại trên hệ thống')
+      throw new NotFoundException('Email không tồn tại trên hệ thống')
     }
     return this.accountsService.updatePassword(account._id.toString(), password)
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto, account: IAccountType) {}
+  async changePassword(changePasswordDto: ChangePasswordDto, account: AccountType) {
+    const { oldPassword, newPassword } = changePasswordDto
 
-  signAccessToken(payload: IAuthTokenPayload) {
+    const accountDocument = await this.accountsService.findByEmail(account.email)
+    if (!accountDocument) {
+      throw new NotFoundException('Tài khoản không tồn tại trên hệ thống')
+    }
+
+    const isMatchPassowrd = await this.accountsService.comparePassword(oldPassword, accountDocument.password)
+    if (!isMatchPassowrd) {
+      throw new BadRequestException('Mật khẩu cũ không chính xác')
+    }
+
+    const payload = account
+    const decodedOldRefreshToken = this.jwtService.decode<AuthTokenPayload>(accountDocument.refreshToken)
+    const [accessToken, refreshToken] = await Promise.all([
+      this.signAccessToken(payload),
+      this.signRefreshToken(payload, decodedOldRefreshToken.exp),
+      this.accountsService.updatePassword(accountDocument._id.toString(), newPassword)
+    ])
+
+    return {
+      accessToken,
+      refreshToken
+    }
+  }
+
+  signAccessToken(payload: AccountType) {
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('accessToken.secret'),
       expiresIn: ms(this.configService.get<StringValue>('accessToken.expiresIn')) / 1000
     })
   }
 
-  signRefreshToken(payload: IAuthTokenPayload, exp?: number) {
+  signRefreshToken(payload: AccountType, exp?: number) {
     if (exp) {
       const expiresIn = Math.ceil((new Date(exp * 1000).getTime() - new Date().getTime()) / 1000)
       return this.jwtService.signAsync(payload, {

@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer'
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator'
 import { Role } from 'core/constants/enum'
 
@@ -13,8 +14,10 @@ export class CreateAccountDto {
   password: string
 
   @MaxLength(40, { message: 'fullname không được vượt quá 40 kí tự' })
+  @MinLength(1, { message: 'password phải có ít nhất 1 kí tự' })
   @IsString({ message: 'fullname phải là định dạng string' })
   @IsNotEmpty({ message: 'fullname không được bỏ trống' })
+  @Transform(({ value }) => value.trim())
   fullName: string
 
   @IsUrl(undefined, { message: 'avatarUrl phải là định dạng URL' })

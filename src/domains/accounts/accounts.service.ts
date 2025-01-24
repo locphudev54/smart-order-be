@@ -3,7 +3,7 @@ import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account } from 'domains/accounts/schemas/account.schema'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import * as bcrypt from 'bcrypt'
 
 @Injectable()
@@ -11,14 +11,26 @@ export class AccountsService {
   private saltRounds = 10
   constructor(@InjectModel(Account.name) private accountModel: Model<Account>) {}
 
-  async create(createAccountDto: CreateAccountDto) {
+  async create(createAccountDto: CreateAccountDto & { _id?: string }) {
     const isExistAccount = await this.accountModel.findOne({ email: createAccountDto.email })
     if (isExistAccount) {
       throw new BadRequestException('Email này đã tồn tại trên hệ thống')
     }
 
     const hashedPassword = await this.hashPassword(createAccountDto.password)
-    return this.accountModel.create({ ...createAccountDto, password: hashedPassword })
+    const newAccount = await this.accountModel.create({
+      ...createAccountDto,
+      password: hashedPassword,
+      _id: createAccountDto._id ?? new mongoose.Types.ObjectId()
+    })
+
+    return {
+      _id: newAccount._id,
+      email: newAccount.email,
+      fullName: newAccount.fullName,
+      avatarUrl: newAccount.avatarUrl,
+      role: newAccount.role
+    }
   }
 
   findAll() {
@@ -41,29 +53,25 @@ export class AccountsService {
     const account = await this.findByEmail(email)
     if (!account) return null
 
-    const isMatchPassword = await bcrypt.compare(password, account.password)
+    const isMatchPassword = await this.comparePassword(password, account.password)
     return isMatchPassword ? account : null
   }
 
-  update(id: string, updateAccountDto: UpdateAccountDto) {
-    const isExist = this.accountModel.findOne({ _id: id })
+  async update(id: string, updateAccountDto: UpdateAccountDto) {
+    const isExist = await this.accountModel.findOne({ _id: id })
     if (!isExist) {
       throw new NotFoundException('Tài khoản không tồn tại')
     }
     return this.accountModel.updateOne({ _id: id }, { ...updateAccountDto })
   }
 
-  updateRefreshToken(id: string, refreshToken: string) {
-    const isExist = this.accountModel.findOne({ id })
-    if (!isExist) {
-      throw new NotFoundException('Tài khoản không tồn tại')
-    }
+  async updateRefreshToken(id: string, refreshToken: string) {
     return this.accountModel.updateOne({ _id: id }, { refreshToken })
   }
 
   async updatePassword(id: string, password: string) {
     const hashedPassword = await this.hashPassword(password)
-    return await this.accountModel.updateOne(
+    return this.accountModel.updateOne(
       { _id: id },
       {
         password: hashedPassword
@@ -71,12 +79,25 @@ export class AccountsService {
     )
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    const isExist = await this.accountModel.findOne({ _id: id })
+    if (!isExist) {
+      throw new NotFoundException('Tài khoản không tồn tại')
+    }
     return this.accountModel.deleteOne({ _id: id })
   }
 
   // ------------------------- Utils Functions ----------------------------------
   hashPassword(password: string) {
     return bcrypt.hash(password, this.saltRounds)
+  }
+
+  /**
+   *
+   * @param password password ở dạng plain text
+   * @param hashedPassword password đã được mã hóa
+   */
+  comparePassword(password: string, hashedPassword: string) {
+    return bcrypt.compare(password, hashedPassword)
   }
 }

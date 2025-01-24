@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import Joi from 'joi'
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
-import { database, environment, port, token } from 'config'
+import { database, environment, port, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
 import { JwtAuthGuard } from 'core/guards/auth/jwt-auth.guard'
 import { ValidationError } from 'class-validator'
@@ -12,11 +12,16 @@ import { ValidationError } from 'class-validator'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [environment, port, database, token],
+      load: [environment, port, database, token, upload],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PORT: Joi.number().port().required(),
-        DATABASE_URI: Joi.string().required()
+        DATABASE_URI: Joi.string().required(),
+        ACCESS_TOKEN_SECRET: Joi.string().required(),
+        ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        REFRESH_TOKEN_SECRET: Joi.string().required(),
+        REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        MULTER_DEFAULT_DEST: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({

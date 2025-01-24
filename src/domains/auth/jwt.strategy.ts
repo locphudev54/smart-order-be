@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { PassportStrategy } from '@nestjs/passport'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { AccountType, AuthTokenPayload } from 'core/types/type'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,9 +17,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   /**
    *
    * @param payload là object decode từ accessToken
-   * @returns về object user mà ta gán vào req - phục vụ cho các route tiếp theo
+   * @returns object user mà ta gán vào req - phục vụ cho các route tiếp theo
    */
-  async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username }
+  validate(payload: AuthTokenPayload): AccountType {
+    delete payload.exp
+    delete payload.iat
+    return payload
   }
 }

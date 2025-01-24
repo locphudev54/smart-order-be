@@ -4,9 +4,10 @@ import { AppService } from './app.service'
 import { CoreModule } from './core/core.module'
 import { AccountsModule } from './domains/accounts/accounts.module'
 import { AuthModule } from 'domains/auth/auth.module'
+import { MediaModule } from './domains/media/media.module'
 
 @Module({
-  imports: [CoreModule, AuthModule, AccountsModule],
+  imports: [CoreModule, AuthModule, AccountsModule, MediaModule],
   controllers: [AppController],
   providers: [AppService]
 })
