@@ -37,7 +37,11 @@ export class AccountsService {
     return this.accountModel.find()
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
+    const account = await this.accountModel.findOne({ _id: id })
+    if (!account) {
+      throw new NotFoundException('Tài khoản không tồn tại')
+    }
     return this.accountModel.findById(id)
   }
 
@@ -58,8 +62,8 @@ export class AccountsService {
   }
 
   async update(id: string, updateAccountDto: UpdateAccountDto) {
-    const isExist = await this.accountModel.findOne({ _id: id })
-    if (!isExist) {
+    const account = await this.accountModel.findOne({ _id: id })
+    if (!account) {
       throw new NotFoundException('Tài khoản không tồn tại')
     }
     return this.accountModel.updateOne({ _id: id }, { ...updateAccountDto })
@@ -80,8 +84,8 @@ export class AccountsService {
   }
 
   async remove(id: string) {
-    const isExist = await this.accountModel.findOne({ _id: id })
-    if (!isExist) {
+    const account = await this.accountModel.findOne({ _id: id })
+    if (!account) {
       throw new NotFoundException('Tài khoản không tồn tại')
     }
     return this.accountModel.deleteOne({ _id: id })

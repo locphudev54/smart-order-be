@@ -5,10 +5,13 @@ import { CoreModule } from './core/core.module'
 import { AccountsModule } from './domains/accounts/accounts.module'
 import { AuthModule } from 'domains/auth/auth.module'
 import { MediaModule } from './domains/media/media.module'
+import { DishesModule } from './domains/dishes/dishes.module'
+import { OrdersModule } from './domains/orders/orders.module'
+import { CaslAbilityFactory } from 'core/casl/casl-ability.factory'
 
 @Module({
-  imports: [CoreModule, AuthModule, AccountsModule, MediaModule],
+  imports: [CoreModule, AuthModule, AccountsModule, MediaModule, DishesModule, OrdersModule],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService, CaslAbilityFactory]
 })
 export class AppModule {}

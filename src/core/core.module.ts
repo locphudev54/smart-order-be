@@ -5,8 +5,10 @@ import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
 import { database, environment, port, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
-import { JwtAuthGuard } from 'core/guards/auth/jwt-auth.guard'
+import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
 import { ValidationError } from 'class-validator'
+import { RolesGuard } from 'core/guards/roles.guard'
+import { CaslModule } from './casl/casl.module'
 
 @Module({
   imports: [
@@ -29,7 +31,8 @@ import { ValidationError } from 'class-validator'
         uri: configService.get<string>('databaseUri')
       }),
       inject: [ConfigService]
-    })
+    }),
+    CaslModule
   ],
   providers: [
     {
@@ -55,6 +58,10 @@ import { ValidationError } from 'class-validator'
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
     }
   ],
   exports: []

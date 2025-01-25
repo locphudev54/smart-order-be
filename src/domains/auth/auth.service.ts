@@ -1,19 +1,17 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-  UnprocessableEntityException
-} from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
+import { CaslAbilityFactory } from 'core/casl/casl-ability.factory'
+import { Action } from 'core/constants/cals'
 import { Role } from 'core/constants/enum'
 import { AccountType, AuthTokenPayload } from 'core/types/type'
 import { AccountsService } from 'domains/accounts/accounts.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
+import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
+import { Dish } from 'domains/dishes/schemas/dish.schema'
 import mongoose from 'mongoose'
 import ms, { StringValue } from 'ms'
 
@@ -22,8 +20,10 @@ export class AuthService {
   constructor(
     private readonly accountsService: AccountsService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private caslAbilityFactory: CaslAbilityFactory
   ) {}
+
   async validateAccount(email: string, password: string) {
     const account = await this.accountsService.findAccountByEmailAndPassword({ email, password })
     if (account) {
@@ -60,14 +60,14 @@ export class AuthService {
         _id: accountId,
         email,
         fullName,
-        role: Role.Customer,
+        role: [Role.Customer],
         avatarUrl: ''
       }),
       this.signRefreshToken({
         _id: accountId,
         email,
         fullName,
-        role: Role.Customer,
+        role: [Role.Customer],
         avatarUrl: ''
       })
     ])
@@ -78,6 +78,11 @@ export class AuthService {
       refreshToken,
       _id: accountId.toString()
     })
+
+    const ability = this.caslAbilityFactory.createForUser(account)
+    ability.can(Action.Read, Dish) // true
+    ability.can(Action.Delete, Dish) // false
+    ability.can(Action.Create, Dish) // false
 
     return {
       accessToken,
@@ -158,6 +163,13 @@ export class AuthService {
       accessToken,
       refreshToken
     }
+  }
+
+  async logout(logoutDto: LogoutDto) {
+    const { refreshToken } = logoutDto
+    const decodedRefreshToken = this.jwtService.decode<AuthTokenPayload>(refreshToken)
+    await this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
+    return 'OK'
   }
 
   signAccessToken(payload: AccountType) {

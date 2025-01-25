@@ -25,7 +25,7 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<T, Respo
           return {
             statusCode,
             message: response.message,
-            data: response,
+            data: response.data,
             meta: response.meta
           }
         }

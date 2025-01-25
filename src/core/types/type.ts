@@ -6,7 +6,7 @@ export type AccountType = {
   email: string
   fullName: string
   avatarUrl: string
-  role: Role
+  role: Role[]
 }
 
 export type AuthTokenPayload = {
@@ -14,7 +14,11 @@ export type AuthTokenPayload = {
   email: string
   fullName: string
   avatarUrl: string
-  role: Role
+  role: Role[]
   iat: number
   exp: number
+}
+
+export type QueryType = {
+  [key: string]: string
 }

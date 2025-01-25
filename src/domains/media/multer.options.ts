@@ -1,10 +1,10 @@
 import fs from 'fs'
 import { diskStorage } from 'multer'
-import { editFileName, imageFileFilter } from 'domains/media/file-upload.utils'
+import { editFileName, imageFileFilter } from 'domains/media/media-upload.utils'
 
-export const multerOptions = {
+export const createMulterOptions = (limitFileSize: number) => ({
   limits: {
-    fileSize: 4 * 1024 * 1024 // 4MB
+    fileSize: limitFileSize
   },
   fileFilter: imageFileFilter,
   storage: diskStorage({
@@ -18,4 +18,4 @@ export const multerOptions = {
     },
     filename: editFileName
   })
-}
+})

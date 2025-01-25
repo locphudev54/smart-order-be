@@ -4,3 +4,9 @@ export enum Role {
   Chef = 'Chef',
   Manager = 'Manager'
 }
+
+export enum DishStatus {
+  Available = 'Available',
+  Unavailable = 'Unavailable',
+  Hidden = 'Hidden'
+}

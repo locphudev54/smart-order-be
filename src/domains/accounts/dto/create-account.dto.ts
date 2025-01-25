@@ -1,5 +1,17 @@
 import { Transform } from 'class-transformer'
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator'
+import {
+  ArrayMinSize,
+  ArrayUnique,
+  IsArray,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength
+} from 'class-validator'
 import { Role } from 'core/constants/enum'
 
 export class CreateAccountDto {
@@ -20,14 +32,19 @@ export class CreateAccountDto {
   @Transform(({ value }) => value.trim())
   fullName: string
 
-  @IsUrl(undefined, { message: 'avatarUrl phải là định dạng URL' })
+  @IsString({ message: 'imageUrl phải là định dạng string' })
   @IsOptional() // Tác dụng khi gọi API
+  @Transform(({ value }) => value.trim())
   avatarUrl?: string // ? Tác dụng cho TS check
 
-  // NOTE: VALIDATE ENUM
+  // NOTE: VALIDATE ARRAY OF ENUM
+  @ArrayUnique({ message: 'Các giá trị trong role phải khác nhau' })
   @IsEnum(Role, {
-    message: `role phải là một trong những giá trị sau: ${Role.Customer} || ${Role.Chef} || ${Role.Manager} || ${Role.Waiter}`
+    each: true,
+    message: `role phải chỉ gồm một trong những giá trị sau: ${Role.Customer} || ${Role.Chef} || ${Role.Manager} || ${Role.Waiter}`
   })
+  @ArrayMinSize(1, { message: 'role phải có ít nhất một vai trò' })
+  @IsArray({ message: 'role phải là một mảng các vai trò' })
   @IsOptional()
   role?: Role
 

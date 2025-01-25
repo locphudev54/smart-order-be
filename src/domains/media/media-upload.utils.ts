@@ -1,14 +1,14 @@
 import { BadRequestException } from '@nestjs/common'
 import { extname } from 'path'
 
-export const imageFileFilter = (req, file, callback) => {
+export const imageFileFilter = (req, file: Express.Multer.File, callback) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
     return callback(new BadRequestException(`Không hỗ trợ tải file có định dạng ${extname(file.originalname)}`), false)
   }
   callback(null, true)
 }
 
-export const editFileName = (req, file, callback) => {
+export const editFileName = (req, file: Express.Multer.File, callback) => {
   const name = file.originalname.split('.')[0]
   const fileExtName = extname(file.originalname)
   const randomName = Array(4)

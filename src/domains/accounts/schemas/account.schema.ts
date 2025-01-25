@@ -21,8 +21,9 @@ export class Account {
   @Prop({ default: '' })
   avatarUrl: string
 
-  @Prop({ type: String, enum: Role, default: Role.Waiter })
-  role: Role
+  // NOTE: Schema Prop: Array of Enum
+  @Prop({ type: [{ type: String, enum: Role }], default: [Role.Customer] })
+  role: Role[]
 
   @Prop({ default: '' })
   refreshToken: string

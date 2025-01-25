@@ -1,11 +1,12 @@
 import { Body, Controller, Patch, Post, Request, UseGuards } from '@nestjs/common'
 import { Account } from 'core/decorators/account.decorator'
 import { Public } from 'core/decorators/public.decorator'
-import { LocalAuthGuard } from 'core/guards/auth/local-auth.guard'
+import { LocalAuthGuard } from 'core/guards/local-auth.guard'
 import { AccountType } from 'core/types/type'
 import { AuthService } from 'domains/auth/auth.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
+import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
 
@@ -41,5 +42,11 @@ export class AuthController {
   @Patch('change-password')
   changePassword(@Body() changePasswordDto: ChangePasswordDto, @Account() account: AccountType) {
     return this.authService.changePassword(changePasswordDto, account)
+  }
+
+  @Public()
+  @Post('logout')
+  logout(@Body() logoutDto: LogoutDto) {
+    return this.authService.logout(logoutDto)
   }
 }
