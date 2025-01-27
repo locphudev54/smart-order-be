@@ -9,9 +9,19 @@ import { DishesModule } from './domains/dishes/dishes.module'
 import { OrdersModule } from './domains/orders/orders.module'
 import { CaslAbilityFactory } from 'core/casl/casl-ability.factory'
 import { TablesModule } from './domains/tables/tables.module'
+import { CustomersModule } from './domains/customers/customers.module'
 
 @Module({
-  imports: [CoreModule, AuthModule, AccountsModule, MediaModule, DishesModule, OrdersModule, TablesModule],
+  imports: [
+    CoreModule,
+    AuthModule,
+    AccountsModule,
+    MediaModule,
+    DishesModule,
+    OrdersModule,
+    TablesModule,
+    CustomersModule
+  ],
   controllers: [AppController],
   providers: [AppService, CaslAbilityFactory]
 })

@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt'
 @Module({
   imports: [MongooseModule.forFeature([{ name: Table.name, schema: TableSchema }])],
   controllers: [TablesController],
-  providers: [TablesService, JwtService]
+  providers: [TablesService, JwtService],
+  exports: [TablesService]
 })
 export class TablesModule {}

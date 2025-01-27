@@ -22,3 +22,22 @@ export type AuthTokenPayload = {
 export type QueryType = {
   [key: string]: string
 }
+
+export type TableTokenPayload = {
+  tableNumber: number
+  iat: number
+}
+
+export type CustomerType = {
+  _id: Types.ObjectId
+  name: string
+  tableNumber: number
+}
+
+export type CustomerTokenPayload = {
+  _id: Types.ObjectId
+  name: string
+  tableNumber: number
+  iat: number
+  exp: number
+}

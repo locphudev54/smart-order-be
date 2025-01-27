@@ -1,8 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
-import { CaslAbilityFactory } from 'core/casl/casl-ability.factory'
-import { Action } from 'core/constants/cals'
 import { Role } from 'core/constants/enum'
 import { AccountType, AuthTokenPayload } from 'core/types/type'
 import { AccountsService } from 'domains/accounts/accounts.service'
@@ -11,7 +9,6 @@ import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
-import { Dish } from 'domains/dishes/schemas/dish.schema'
 import mongoose from 'mongoose'
 import ms, { StringValue } from 'ms'
 
@@ -20,8 +17,7 @@ export class AuthService {
   constructor(
     private readonly accountsService: AccountsService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private caslAbilityFactory: CaslAbilityFactory
+    private readonly configService: ConfigService
   ) {}
 
   async validateAccount(email: string, password: string) {
@@ -79,10 +75,10 @@ export class AuthService {
       _id: accountId.toString()
     })
 
-    const ability = this.caslAbilityFactory.createForUser(account)
-    ability.can(Action.Read, Dish) // true
-    ability.can(Action.Delete, Dish) // false
-    ability.can(Action.Create, Dish) // false
+    // const ability = this.caslAbilityFactory.createForUser(account)
+    // ability.can(Action.Read, Dish) // true
+    // ability.can(Action.Delete, Dish) // false
+    // ability.can(Action.Create, Dish) // false
 
     return {
       accessToken,
@@ -102,14 +98,7 @@ export class AuthService {
         secret: this.configService.get<string>('refreshToken.secret')
       })
 
-      const payload: AccountType = {
-        _id: account._id,
-        email: account.email,
-        fullName: account.fullName,
-        avatarUrl: account.avatarUrl,
-        role: account.role
-      }
-
+      const { iat, exp, ...payload } = decodedOldRefreshToken
       const [accessToken, refreshToken] = await Promise.all([
         this.signAccessToken(payload),
         this.signRefreshToken(payload, decodedOldRefreshToken.exp)

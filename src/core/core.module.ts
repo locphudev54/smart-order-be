@@ -5,10 +5,10 @@ import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
 import { client, database, environment, port, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
-import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
 import { ValidationError } from 'class-validator'
 import { RolesGuard } from 'core/guards/roles.guard'
 import { CaslModule } from './casl/casl.module'
+import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
 
 @Module({
   imports: [
@@ -25,7 +25,11 @@ import { CaslModule } from './casl/casl.module'
         REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         MULTER_DEFAULT_DEST: Joi.string().required(),
         CLIENT_BASE_URL: Joi.string().required(),
-        TABLE_TOKEN_SECRET: Joi.string().required()
+        TABLE_TOKEN_SECRET: Joi.string().required(),
+        // CUSTOMER_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        CUSTOMER_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        // CUSTOMER_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        CUSTOMER_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({

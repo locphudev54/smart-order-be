@@ -46,7 +46,6 @@ export class AuthController {
     return this.authService.changePassword(changePasswordDto, account)
   }
 
-  @Public()
   @Post('logout')
   logout(@Body() logoutDto: LogoutDto) {
     return this.authService.logout(logoutDto)

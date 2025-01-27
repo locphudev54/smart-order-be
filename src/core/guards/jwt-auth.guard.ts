@@ -15,6 +15,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass()
     ])
+
     if (isPublic) {
       return true
     }
@@ -22,7 +23,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
     if (!token) {
-      throw new UnauthorizedException('Không nhân được Access Token')
+      throw new UnauthorizedException('Không nhận được Access Token')
     }
 
     return super.canActivate(context)
