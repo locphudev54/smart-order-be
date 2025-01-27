@@ -1,6 +1,7 @@
 import { Body, Controller, Patch, Post, Request, UseGuards } from '@nestjs/common'
 import { Account } from 'core/decorators/account.decorator'
 import { Public } from 'core/decorators/public.decorator'
+import { ResponseMessage } from 'core/decorators/response-message.decorator'
 import { LocalAuthGuard } from 'core/guards/local-auth.guard'
 import { AccountType } from 'core/types/type'
 import { AuthService } from 'domains/auth/auth.service'
@@ -17,6 +18,7 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @ResponseMessage('Login thành công')
   login(@Request() req) {
     return this.authService.login(req.user as AccountType)
   }

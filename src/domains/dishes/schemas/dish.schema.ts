@@ -15,7 +15,7 @@ export class Dish {
   @Prop({ required: true })
   price: number
 
-  @Prop({ type: String, enum: DishStatus, default: DishStatus.Hidden })
+  @Prop({ type: String, enum: DishStatus, default: DishStatus.Available })
   status: DishStatus
 
   @Prop({ default: '' })

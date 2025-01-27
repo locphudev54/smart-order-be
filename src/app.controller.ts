@@ -3,6 +3,7 @@ import { AppAbility } from 'core/casl/casl-ability.factory'
 import { Action } from 'core/constants/cals'
 import { Role } from 'core/constants/enum'
 import { CheckPolicies } from 'core/decorators/check-policies.decorator'
+import { ResponseMessage } from 'core/decorators/response-message.decorator'
 import { Roles } from 'core/decorators/roles.decorator'
 import { PoliciesGuard } from 'core/guards/policies.guard'
 import { Dish } from 'domains/dishes/schemas/dish.schema'
@@ -12,6 +13,7 @@ export class AppController {
 
   @Get()
   @Roles(Role.Manager, Role.Chef, Role.Customer)
+  @ResponseMessage('Test response message decorator')
   getHello() {
     return 'Xin chào các bạn'
   }

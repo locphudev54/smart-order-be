@@ -6,5 +6,8 @@ export default () => ({
   refreshToken: {
     secret: process.env.REFRESH_TOKEN_SECRET,
     expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME
+  },
+  tableToken: {
+    secret: process.env.TABLE_TOKEN_SECRET
   }
 })

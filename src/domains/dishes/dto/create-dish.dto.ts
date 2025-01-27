@@ -5,12 +5,12 @@ import { DishStatus } from 'core/constants/enum'
 export class CreateDishDto {
   @MaxLength(40, { message: 'title không được vượt quá 40 kí tự' })
   @MinLength(2, { message: 'title phải có ít nhất 2 kí tự' })
-  @IsString({ message: 'title phải là định dạng string' })
+  @IsString({ message: 'title phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'title không được  bỏ trống' })
   @Transform(({ value }) => value.trim())
   title: string
 
-  @IsString({ message: 'description phải là định dạng string' })
+  @IsString({ message: 'description phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'description không được  bỏ trống' })
   @Transform(({ value }) => value.trim())
   description: string
@@ -27,7 +27,7 @@ export class CreateDishDto {
   @IsOptional()
   status?: DishStatus
 
-  @IsString({ message: 'imageUrl phải là định dạng string' })
+  @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
   @IsOptional() // Tác dụng khi gọi API
   @Transform(({ value }) => value.trim())
   imageUrl?: string // ? Tác dụng cho TS check

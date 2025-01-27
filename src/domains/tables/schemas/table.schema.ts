@@ -1,0 +1,26 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { TableStatus } from 'core/constants/enum'
+import { HydratedDocument } from 'mongoose'
+
+export type TableDocument = HydratedDocument<Table>
+
+@Schema({ timestamps: true })
+export class Table {
+  @Prop({ required: true, unique: true })
+  number: number
+
+  @Prop({ required: true })
+  capacity: number
+
+  // NOTE: Schema Prop: Enum
+  @Prop({ type: String, enum: TableStatus, default: TableStatus.Available })
+  status: TableStatus
+
+  @Prop({ required: true, unique: true })
+  reservationLink: string
+
+  @Prop({ required: true, unique: true })
+  token: string
+}
+
+export const TableSchema = SchemaFactory.createForClass(Table)

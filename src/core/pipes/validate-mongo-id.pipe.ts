@@ -8,8 +8,8 @@ export class ValidateMongoIdPipe implements PipeTransform<string> {
       if (String(new ObjectId(value)) === value) {
         return value
       }
-      throw new BadRequestException()
+      throw new BadRequestException('Param ObjectId của thực thể không hợp lệ')
     }
-    throw new BadRequestException()
+    throw new BadRequestException('Param ObjectId của thực thể không hợp lệ')
   }
 }

@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import Joi from 'joi'
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
-import { database, environment, port, token, upload } from 'config'
+import { client, database, environment, port, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
 import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
 import { ValidationError } from 'class-validator'
@@ -14,7 +14,7 @@ import { CaslModule } from './casl/casl.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [environment, port, database, token, upload],
+      load: [environment, port, database, token, upload, client],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PORT: Joi.number().port().required(),
@@ -23,7 +23,9 @@ import { CaslModule } from './casl/casl.module'
         ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
         REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
-        MULTER_DEFAULT_DEST: Joi.string().required()
+        MULTER_DEFAULT_DEST: Joi.string().required(),
+        CLIENT_BASE_URL: Joi.string().required(),
+        TABLE_TOKEN_SECRET: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({
