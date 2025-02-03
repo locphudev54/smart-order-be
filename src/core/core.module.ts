@@ -8,7 +8,10 @@ import { TransformResponseInterceptor } from 'core/interceptors/transform-respon
 import { ValidationError } from 'class-validator'
 import { RolesGuard } from 'core/guards/roles.guard'
 import { CaslModule } from './casl/casl.module'
-import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
+import { extractErrorMessageFromDto } from 'core/utils/utils'
+import { JwtEmployeeAuthGuard } from 'core/guards/jwt-employee-auth.guard'
+import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
+import { JwtAuthenticatedAuthGuard } from 'core/guards/jwt-authenticated-auth-.guard'
 
 @Module({
   imports: [
@@ -19,17 +22,17 @@ import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PORT: Joi.number().port().required(),
         DATABASE_URI: Joi.string().required(),
-        ACCESS_TOKEN_SECRET: Joi.string().required(),
-        ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
-        REFRESH_TOKEN_SECRET: Joi.string().required(),
-        REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        EMPLOYEE_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        EMPLOYEE_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        EMPLOYEE_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        EMPLOYEE_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         MULTER_DEFAULT_DEST: Joi.string().required(),
         CLIENT_BASE_URL: Joi.string().required(),
         TABLE_TOKEN_SECRET: Joi.string().required(),
-        // CUSTOMER_ACCESS_TOKEN_SECRET: Joi.string().required(),
         CUSTOMER_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
-        // CUSTOMER_REFRESH_TOKEN_SECRET: Joi.string().required(),
-        CUSTOMER_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required()
+        CUSTOMER_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        CUSTOMER_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        CUSTOMER_REFRESH_TOKEN_SECRET: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({
@@ -52,10 +55,11 @@ import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
         transform: true,
         stopAtFirstError: true,
         exceptionFactory: (validationErrors: ValidationError[] = []) => {
+          const errorMessage = extractErrorMessageFromDto(validationErrors)
           return new UnprocessableEntityException(
-            validationErrors.map((error) => ({
+            validationErrors.map((error, index) => ({
               field: error.property,
-              message: Object.values(error.constraints).join(', ')
+              message: errorMessage[index]
             }))
           )
         }
@@ -63,7 +67,15 @@ import { JwtAuthGuard } from 'core/guards/jwt-auth.guard'
     },
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard
+      useClass: JwtEmployeeAuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtCustomerAuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthenticatedAuthGuard
     },
     {
       provide: APP_GUARD,

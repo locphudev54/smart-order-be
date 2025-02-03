@@ -5,7 +5,7 @@ import { AuthService } from 'domains/auth/auth.service'
 import { AccountType } from 'core/types/type'
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class LocalEmployeeStrategy extends PassportStrategy(Strategy, 'local-employee') {
   constructor(private authService: AuthService) {
     super({ usernameField: 'email' })
   }
@@ -18,7 +18,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
     // Gán vào req.user
     return {
-      _id: account._id,
+      _id: account._id.toString(),
       avatarUrl: account.avatarUrl,
       email: account.email,
       fullName: account.fullName,

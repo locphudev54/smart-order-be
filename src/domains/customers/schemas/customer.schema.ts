@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument } from 'mongoose'
+import mongoose, { HydratedDocument, Types } from 'mongoose'
 
 export type CustomerDocument = HydratedDocument<Customer>
 
@@ -8,8 +8,8 @@ export class Customer {
   @Prop({ required: true })
   name: string
 
-  @Prop({ required: true })
-  tableNumber: number
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Table' })
+  tableId: Types.ObjectId
 
   @Prop({ default: '' })
   refreshToken: string

@@ -1,8 +1,7 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CreateCustomerDto } from './dto/create-customer.dto'
-import { UpdateCustomerDto } from './dto/update-customer.dto'
 import { InjectModel } from '@nestjs/mongoose'
-import { Customer } from 'domains/customers/schemas/customer.schema'
+import { Customer, CustomerDocument } from 'domains/customers/schemas/customer.schema'
 import { Model } from 'mongoose'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
@@ -12,38 +11,39 @@ import { TablesService } from 'domains/tables/tables.service'
 import { TableStatus } from 'core/constants/enum'
 import { RefreshTokenDto } from 'domains/customers/dto/refresh-token.dto'
 import { LogoutDto } from 'domains/customers/dto/logout.dto'
+import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 
 @Injectable()
 export class CustomersService {
   constructor(
-    @InjectModel(Customer.name) private customerModel: Model<Customer>,
+    @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly tablesService: TablesService
+    // private readonly ordersService: OrdersService
   ) {}
 
-  create(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer'
+  async create(createCustomerDto: CreateCustomerDto) {
+    const { tableNumber } = createCustomerDto
+    const table = await this.tablesService.findTableByNumber(tableNumber)
+    if (!table) {
+      throw new BadRequestException('Bàn không tồn tại')
+    }
+    return this.customerModel.create(createCustomerDto)
   }
 
-  findAll() {
-    return `This action returns all customers`
-  }
+  createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType) {}
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`
+  async findOne(id: string) {
+    const customer = await this.customerModel.findOne({ _id: id })
+    if (!customer) {
+      throw new NotFoundException('Khách hàng không tồn tại')
+    }
+    return customer
   }
 
   findByRefreshToken(refreshToken: string) {
     return this.customerModel.findOne({ refreshToken })
-  }
-
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} customer`
   }
 
   // ----------------- AUTH SERVICES ----------------------
@@ -59,14 +59,14 @@ export class CustomersService {
       })
 
     const tableWithNumber = await this.tablesService.findTableByNumber(tableNumber)
-    if (!tableNumber) {
+    if (!tableWithNumber) {
       throw new BadRequestException('Bàn không tồn tại')
     }
 
     if (tableWithNumber.status !== TableStatus.Available) {
-      throw new BadRequestException('Bàn này đã được đặt trước hoặc có người đang xử dụng')
+      throw new BadRequestException('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
-    return this.customerModel.create({ name, tableNumber })
+    return this.customerModel.create({ name, tableId: tableWithNumber._id })
   }
 
   async login(customer: CustomerType) {
@@ -98,7 +98,7 @@ export class CustomersService {
       }
 
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<CustomerTokenPayload>(refreshToken, {
-        secret: this.configService.get<string>('refreshToken.secret')
+        secret: this.configService.get<string>('customerRefreshToken.secret')
       })
       const { iat, exp, ...payload } = decodedOldRefreshToken
       const [accessToken, newRefreshToken] = await Promise.all([
@@ -122,7 +122,7 @@ export class CustomersService {
 
   signCustomerAccessToken(payload: CustomerType) {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('accessToken.secret'),
+      secret: this.configService.get<string>('customerAccessToken.secret'),
       expiresIn: ms(this.configService.get<StringValue>('customerAccessToken.expiresIn')) / 1000
     })
   }
@@ -131,12 +131,12 @@ export class CustomersService {
     if (exp) {
       const expiresIn = Math.ceil((new Date(exp * 1000).getTime() - new Date().getTime()) / 1000)
       return this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('refreshToken.secret'),
+        secret: this.configService.get<string>('customerRefreshToken.secret'),
         expiresIn
       })
     }
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('refreshToken.secret'),
+      secret: this.configService.get<string>('customerRefreshToken.secret'),
       expiresIn: ms(this.configService.get<StringValue>('customerRefreshToken.expiresIn')) / 1000
     })
   }

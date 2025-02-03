@@ -12,7 +12,7 @@ export class AppController {
   constructor() {}
 
   @Get()
-  @Roles(Role.Manager, Role.Chef, Role.Customer)
+  @Roles(Role.Manager, Role.Chef)
   @ResponseMessage('Test response message decorator')
   getHello() {
     return 'Xin chào các bạn'

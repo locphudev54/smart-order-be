@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Param, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common'
+import { Body, Controller, Delete, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
+import { AuthenticatedUserAccess } from 'core/decorators/authenticated-user-access.decorator'
 import { MediaService } from 'domains/media/media.service'
 import { createMulterOptions } from 'domains/media/multer.options'
 
@@ -11,6 +12,7 @@ const LIMIT_UPLOAD_MULTIPLE_FILE = MAX_COUNT_UPLOAD_MULTIPLE_FILE * LIMIT_UPLOAD
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
+  @AuthenticatedUserAccess()
   @Post('/upload/single')
   @UseInterceptors(FileInterceptor('file', createMulterOptions(LIMIT_UPLOAD_SINGLE_FILE))) // file: key trong object FormData truyền lên (formData.append('file', YOUR_FILE))
   uploadSingleFile(
@@ -23,6 +25,7 @@ export class MediaController {
     }
   }
 
+  @AuthenticatedUserAccess()
   @Post('/upload/multiple')
   @UseInterceptors(
     FilesInterceptor('files', MAX_COUNT_UPLOAD_MULTIPLE_FILE, createMulterOptions(LIMIT_UPLOAD_MULTIPLE_FILE))
@@ -37,6 +40,7 @@ export class MediaController {
     }
   }
 
+  @AuthenticatedUserAccess()
   @Delete()
   deleteSingleFile(@Body() body: { filePath: string }) {
     this.mediaService.deleteFile(body.filePath)

@@ -30,7 +30,7 @@ export class AuthService {
   }
 
   /**
-   * @param account chính là req.user từ LocalStrategy ~ kết quả trả về của hàm validateAccount()
+   * @param account chính là req.user từ LocalEmployeeStrategy ~ kết quả trả về của hàm validateAccount()
    */
   async login(account: AccountType) {
     const payload = account
@@ -53,17 +53,17 @@ export class AuthService {
     const accountId = new mongoose.Types.ObjectId()
     const [accessToken, refreshToken] = await Promise.all([
       this.signAccessToken({
-        _id: accountId,
+        _id: accountId.toString(),
         email,
         fullName,
-        role: [Role.Customer],
+        role: [Role.Waiter],
         avatarUrl: ''
       }),
       this.signRefreshToken({
-        _id: accountId,
+        _id: accountId.toString(),
         email,
         fullName,
-        role: [Role.Customer],
+        role: [Role.Waiter],
         avatarUrl: ''
       })
     ])
@@ -95,7 +95,7 @@ export class AuthService {
       }
 
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshTokenDto.refreshToken, {
-        secret: this.configService.get<string>('refreshToken.secret')
+        secret: this.configService.get<string>('employeeRefreshToken.secret')
       })
 
       const { iat, exp, ...payload } = decodedOldRefreshToken
@@ -163,8 +163,8 @@ export class AuthService {
 
   signAccessToken(payload: AccountType) {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('accessToken.secret'),
-      expiresIn: ms(this.configService.get<StringValue>('accessToken.expiresIn')) / 1000
+      secret: this.configService.get<string>('employeeAccessToken.secret'),
+      expiresIn: ms(this.configService.get<StringValue>('employeeAccessToken.expiresIn')) / 1000
     })
   }
 
@@ -172,13 +172,13 @@ export class AuthService {
     if (exp) {
       const expiresIn = Math.ceil((new Date(exp * 1000).getTime() - new Date().getTime()) / 1000)
       return this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('refreshToken.secret'),
+        secret: this.configService.get<string>('employeeRefreshToken.secret'),
         expiresIn
       })
     }
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('refreshToken.secret'),
-      expiresIn: ms(this.configService.get<StringValue>('refreshToken.expiresIn')) / 1000 // chia 1000 để đổi từ milisecond -> second
+      secret: this.configService.get<string>('employeeRefreshToken.secret'),
+      expiresIn: ms(this.configService.get<StringValue>('employeeRefreshToken.expiresIn')) / 1000 // chia 1000 để đổi từ milisecond -> second
     })
   }
 }

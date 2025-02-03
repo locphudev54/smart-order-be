@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateDishDto } from './dto/create-dish.dto'
 import { UpdateDishDto } from './dto/update-dish.dto'
 import { InjectModel } from '@nestjs/mongoose'
-import { Dish } from 'domains/dishes/schemas/dish.schema'
+import { Dish, DishDocument } from 'domains/dishes/schemas/dish.schema'
 import { Model } from 'mongoose'
 import { QueryType } from 'core/types/type'
 import aqp from 'api-query-params'
 
 @Injectable()
 export class DishesService {
-  constructor(@InjectModel(Dish.name) private dishModel: Model<Dish>) {}
+  constructor(@InjectModel(Dish.name) private readonly dishModel: Model<DishDocument>) {}
 
   create(createDishDto: CreateDishDto) {
     return this.dishModel.create(createDishDto)

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
 import { OrdersService } from './orders.service'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
+import { QueryType } from 'core/types/type'
 
 @Controller('orders')
 export class OrdersController {
@@ -13,8 +14,8 @@ export class OrdersController {
   }
 
   @Get()
-  findAll() {
-    return this.ordersService.findAll()
+  findAll(@Query() qs: QueryType) {
+    return this.ordersService.findAll(qs)
   }
 
   @Get(':id')

@@ -2,14 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account } from 'domains/accounts/schemas/account.schema'
+import { Account, AccountDocument } from 'domains/accounts/schemas/account.schema'
 import mongoose, { Model } from 'mongoose'
 import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class AccountsService {
   private saltRounds = 10
-  constructor(@InjectModel(Account.name) private accountModel: Model<Account>) {}
+  constructor(@InjectModel(Account.name) private accountModel: Model<AccountDocument>) {}
 
   async create(createAccountDto: CreateAccountDto & { _id?: string }) {
     const isExistAccount = await this.accountModel.findOne({ email: createAccountDto.email })

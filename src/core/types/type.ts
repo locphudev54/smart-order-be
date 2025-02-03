@@ -1,8 +1,7 @@
 import { Role } from 'core/constants/enum'
-import { Types } from 'mongoose'
 
 export type AccountType = {
-  _id: Types.ObjectId
+  _id: string
   email: string
   fullName: string
   avatarUrl: string
@@ -10,7 +9,7 @@ export type AccountType = {
 }
 
 export type AuthTokenPayload = {
-  _id: Types.ObjectId
+  _id: string
   email: string
   fullName: string
   avatarUrl: string
@@ -29,15 +28,15 @@ export type TableTokenPayload = {
 }
 
 export type CustomerType = {
-  _id: Types.ObjectId
+  _id: string
   name: string
-  tableNumber: number
+  tableId: string
 }
 
 export type CustomerTokenPayload = {
-  _id: Types.ObjectId
+  _id: string
   name: string
-  tableNumber: number
+  tableId: string
   iat: number
   exp: number
 }

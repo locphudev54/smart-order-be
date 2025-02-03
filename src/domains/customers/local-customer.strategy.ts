@@ -5,7 +5,7 @@ import { CustomerType } from 'core/types/type'
 import { CustomersService } from 'domains/customers/customers.service'
 
 @Injectable()
-export class LocalCustomerStrategy extends PassportStrategy(Strategy, 'customer') {
+export class LocalCustomerStrategy extends PassportStrategy(Strategy, 'local-customer') {
   constructor(private customersService: CustomersService) {
     super({ usernameField: 'name', passwordField: 'tableToken' })
   }
@@ -13,6 +13,6 @@ export class LocalCustomerStrategy extends PassportStrategy(Strategy, 'customer'
   async validate(name: string, tableToken: string): Promise<CustomerType> {
     const customer = await this.customersService.validateCustomer(name, tableToken)
     // Gán vào req.user
-    return { _id: customer._id, name: customer.name, tableNumber: customer.tableNumber }
+    return { _id: customer._id.toString(), name: customer.name, tableId: customer.tableId.toString() }
   }
 }

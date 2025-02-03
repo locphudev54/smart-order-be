@@ -5,10 +5,15 @@ import mongoose, { Types } from 'mongoose'
 export class OrderItem {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Dish' })
   dishId: Types.ObjectId
-  // dishId: Dish;
 
   @Prop()
   quantity: number
+
+  @Prop()
+  price: number
+
+  @Prop({ required: true })
+  note: string
 }
 
 export const OrderItemSchema = SchemaFactory.createForClass(OrderItem)

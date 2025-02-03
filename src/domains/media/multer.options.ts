@@ -10,7 +10,7 @@ export const createMulterOptions = (limitFileSize: number) => ({
   storage: diskStorage({
     destination: (req, file: any, cb: any) => {
       const folderName = req.headers['folder-name'] ?? 'tmp'
-      const uploadPath = `./upload/${folderName}`
+      const uploadPath = `${process.env.MULTER_DEFAULT_DEST}/${folderName}`
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true })
       }

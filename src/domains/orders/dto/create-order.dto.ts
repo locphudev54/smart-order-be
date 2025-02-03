@@ -1,34 +1,29 @@
-import { Transform } from 'class-transformer'
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator'
+import { Type } from 'class-transformer'
+import { ArrayMinSize, IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator'
 import { OrderStatus } from 'core/constants/enum'
+import { OrderItemDto } from 'domains/orders/dto/order-item.dto'
+import { Types } from 'mongoose'
 
 export class CreateOrderDto {
-  @MaxLength(40, { message: 'title không được vượt quá 40 kí tự' })
-  @MinLength(2, { message: 'title phải có ít nhất 2 kí tự' })
-  @IsString({ message: 'title phải là kiểu dữ liệu là string' })
-  @IsNotEmpty({ message: 'title không được  bỏ trống' })
-  @Transform(({ value }) => value.trim())
-  title: string
+  @IsMongoId({ message: 'customerId phải là định dạng ObjectId' })
+  @IsNotEmpty({ message: 'customerId không được bỏ trống' })
+  customerId: Types.ObjectId
 
-  @IsString({ message: 'description phải là kiểu dữ liệu là string' })
-  @IsNotEmpty({ message: 'description không được  bỏ trống' })
-  @Transform(({ value }) => value.trim())
-  description: string
-
-  @Min(0, { message: 'price phải > 0' })
-  @IsNumber({ allowNaN: false }, { message: 'price phải là định dạng số' })
-  @IsNotEmpty({ message: 'price không được bỏ trống' })
-  @Transform(({ value }) => Number(value))
-  price: number
+  // NOTE: VALIDATE ARRAY OF NESTED OBJECT
+  @Type(() => OrderItemDto)
+  @ValidateNested({ each: true, message: 'các phần tử trong items không đúng định dạng' })
+  @ArrayMinSize(1, { message: 'items phải có ít nhất một món ăn' })
+  @IsArray({ message: 'items phải là định dạng mảng' })
+  @IsNotEmpty({ message: 'items không được bỏ trống' })
+  items: OrderItemDto[]
 
   @IsEnum(OrderStatus, {
-    message: `status phải là một trong những giá trị sau: ${OrderStatus.Processing} || ${OrderStatus.Cooked} || ${OrderStatus.Served} || ${OrderStatus.Rejected} || ${OrderStatus.Paid}  || ${OrderStatus.Canceled} `
+    message: `status phải là một trong những giá trị sau: ${OrderStatus.Canceled} || ${OrderStatus.Cooked} || ${OrderStatus.Paid} || ${OrderStatus.Processing} || ${OrderStatus.Rejected} || ${OrderStatus.Served}`
   })
   @IsOptional()
   status?: OrderStatus
 
-  @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
-  @IsOptional() // Tác dụng khi gọi API
-  @Transform(({ value }) => value.trim())
-  imageUrl?: string // ? Tác dụng cho TS check
+  @IsMongoId({ message: 'tableId phải là định dạng ObjectId' })
+  @IsNotEmpty({ message: 'tableId không được bỏ trống' })
+  tableId: Types.ObjectId
 }

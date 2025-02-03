@@ -2,11 +2,13 @@ import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/com
 import { Reflector } from '@nestjs/core'
 import { TokenExpiredError } from '@nestjs/jwt'
 import { AuthGuard } from '@nestjs/passport'
+import { IS_AUTHENTICATED_USER_ACCESS } from 'core/decorators/authenticated-user-access.decorator'
+import { IS_CUSTOMER_ROUTE } from 'core/decorators/customer-route.decorator'
 import { IS_PUBLIC_KEY } from 'core/decorators/public.decorator'
 import { Request } from 'express'
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtCustomerAuthGuard extends AuthGuard('jwt-customer') {
   constructor(private reflector: Reflector) {
     super()
   }
@@ -16,7 +18,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getClass()
     ])
 
-    if (isPublic) {
+    const isCustomerRoutes = this.reflector.getAllAndOverride<boolean>(IS_CUSTOMER_ROUTE, [
+      context.getHandler(),
+      context.getClass()
+    ])
+
+    const isAuthenticatedUserAccess = this.reflector.getAllAndOverride<boolean>(IS_AUTHENTICATED_USER_ACCESS, [
+      context.getHandler(),
+      context.getClass()
+    ])
+
+    if (isPublic || !isCustomerRoutes || isAuthenticatedUserAccess) {
       return true
     }
 
@@ -35,7 +47,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err, user, info) {
-    // You can throw an exception based on either "info" or "err" arguments
     if (info instanceof TokenExpiredError) {
       throw new UnauthorizedException('Access Token hết hạn')
     }

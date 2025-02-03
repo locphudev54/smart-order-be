@@ -7,6 +7,7 @@ import { Dish, DishSchema } from 'domains/dishes/schemas/dish.schema'
 @Module({
   imports: [MongooseModule.forFeature([{ name: Dish.name, schema: DishSchema }])],
   controllers: [DishesController],
-  providers: [DishesService]
+  providers: [DishesService],
+  exports: [DishesService]
 })
 export class DishesModule {}

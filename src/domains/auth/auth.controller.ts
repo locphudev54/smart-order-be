@@ -2,7 +2,7 @@ import { Body, Controller, Patch, Post, Request, UseGuards } from '@nestjs/commo
 import { Account } from 'core/decorators/account.decorator'
 import { Public } from 'core/decorators/public.decorator'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
-import { LocalAuthGuard } from 'core/guards/local-auth.guard'
+import { LocalEmployeeAuthGuard } from 'core/guards/local-employee-auth.guard'
 import { AccountType } from 'core/types/type'
 import { AuthService } from 'domains/auth/auth.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
@@ -16,7 +16,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalEmployeeAuthGuard)
   @Post('login')
   @ResponseMessage('Login thành công')
   login(@Request() req) {

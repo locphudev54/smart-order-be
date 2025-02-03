@@ -3,14 +3,14 @@ import { AuthService } from './auth.service'
 import { PassportModule } from '@nestjs/passport'
 import { JwtService } from '@nestjs/jwt'
 import { AuthController } from './auth.controller'
-import { LocalStrategy } from 'domains/auth/local.strategy'
-import { JwtStrategy } from 'domains/auth/jwt.strategy'
+import { LocalEmployeeStrategy } from 'domains/auth/local-employee.strategy'
+import { JwtEmployeeStrategy } from 'domains/auth/jwt-employee.strategy'
 import { AccountsModule } from 'domains/accounts/accounts.module'
 import { CaslModule } from 'core/casl/casl.module'
 
 @Module({
   imports: [PassportModule, AccountsModule, CaslModule],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtService]
+  providers: [AuthService, LocalEmployeeStrategy, JwtEmployeeStrategy, JwtService]
 })
 export class AuthModule {}

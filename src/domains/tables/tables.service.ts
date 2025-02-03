@@ -5,14 +5,14 @@ import { QueryType } from 'core/types/type'
 import aqp from 'api-query-params'
 import { CreateTableDto } from 'domains/tables/dto/create-table.dto'
 import { UpdateTableDto } from 'domains/tables/dto/update-table.dto'
-import { Table } from 'domains/tables/schemas/table.schema'
+import { Table, TableDocument } from 'domains/tables/schemas/table.schema'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class TablesService {
   constructor(
-    @InjectModel(Table.name) private tableModel: Model<Table>,
+    @InjectModel(Table.name) private readonly tableModel: Model<TableDocument>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {}

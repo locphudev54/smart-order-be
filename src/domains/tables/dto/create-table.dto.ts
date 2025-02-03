@@ -20,13 +20,4 @@ export class CreateTableDto {
   })
   @IsOptional()
   status?: TableStatus
-  // @IsString({ message: 'reservationLink phải là kiểu dữ liệu là string' })
-  // @IsNotEmpty({ message: 'reservationLink không được  bỏ trống' })
-  // @Transform(({ value }) => value.trim())
-  // reservationLink: string
-
-  // @IsString({ message: 'token phải là kiểu dữ liệu là string' })
-  // @IsNotEmpty({ message: 'token không được  bỏ trống' })
-  // @Transform(({ value }) => value.trim())
-  // token: string
 }
