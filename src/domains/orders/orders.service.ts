@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -7,23 +7,60 @@ import { Model } from 'mongoose'
 import aqp from 'api-query-params'
 import { CustomersService } from 'domains/customers/customers.service'
 import { QueryType } from 'core/types/type'
+import { OrderItem } from 'domains/orders/schemas/order-item.schema'
+import { OrderStatus, TableStatus } from 'core/constants/enum'
+import { TablesService } from 'domains/tables/tables.service'
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-    private readonly customersService: CustomersService
+    @Inject(forwardRef(() => CustomersService))
+    private readonly customersService: CustomersService,
+    private readonly tablesService: TablesService
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    const { customerId, items, status } = createOrderDto
+    const { customerId, items } = createOrderDto
     const customer = await this.customersService.findOne(customerId.toString())
-    const { tableId } = customer
+    const { table: tableId } = customer
 
-    const totalPrice = items.reduce((result, orderItem) => {
+    const orderItems: OrderItem[] = items.map((item) => {
+      const { dishId, ...rest } = item
+      return {
+        dish: dishId,
+        ...rest
+      }
+    })
+
+    let totalPrice = items.reduce((result, orderItem) => {
       return result + orderItem.price * orderItem.quantity
     }, 0)
-    return this.orderModel.create({ customerId: customer._id, items, status, tableId, totalPrice })
+
+    const previousOrder = await this.orderModel.findOne({ customer: customerId })
+    if (!previousOrder) {
+      // TH1: Lần đầu đặt món ăn -> Tạo mới Order như bình thường
+      return this.orderModel.create({
+        customer: customer._id,
+        items: orderItems,
+        table: tableId,
+        totalPrice
+      })
+    } else {
+      // TH2: Đã có đơn hàng trước đó -> Thêm mới các OrdeItem lúc sau vào mảng items
+      totalPrice = totalPrice + previousOrder.totalPrice
+      return this.orderModel.updateOne(
+        {
+          _id: previousOrder._id
+        },
+        {
+          $push: {
+            items: orderItems
+          },
+          totalPrice
+        }
+      )
+    }
   }
 
   async findAll(qs: QueryType) {
@@ -33,7 +70,7 @@ export class OrdersService {
     delete qs.limit
 
     const skip = (page - 1) * limit
-    const { filter, sort, projection, population } = aqp(qs)
+    const { filter, sort, projection } = aqp(qs)
 
     const [result, totalDocument] = await Promise.all([
       this.orderModel
@@ -42,7 +79,14 @@ export class OrdersService {
         .limit(limit)
         .sort(sort as any)
         .select(projection)
-        .populate(population), // look up đến Customer & DishSnapShot Collection & Table Collection
+        .populate([
+          { path: 'customer', select: ['_id', 'name'] },
+          { path: 'items.dish', select: ['-updatedAt', '-createdAt'] },
+          {
+            path: 'table',
+            select: ['_id', 'number', 'capacity', 'status']
+          }
+        ]),
       this.orderModel.find(filter)
     ])
     const totalPage = Math.ceil(totalDocument.length / result.length)
@@ -57,15 +101,63 @@ export class OrdersService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`
+  async findOne(id: string) {
+    const order = await this.orderModel.findOne({ _id: id }).populate([
+      { path: 'customer', select: ['_id', 'name'] },
+      { path: 'items.dish', select: ['-updatedAt', '-createdAt'] },
+      {
+        path: 'table',
+        select: ['_id', 'number', 'capacity', 'status']
+      }
+    ])
+    if (!order) {
+      throw new NotFoundException('Đơn hàng không tồn tại')
+    }
+    return order
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`
-  }
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
+    const { itemId } = updateOrderDto
+    const order = await this.orderModel.findOne({ _id: id })
+    if (!order) {
+      throw new NotFoundException('Đơn hàng không tồn tại')
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`
+    // Tạo ra OrderItem mới & Tính toán lại `totalPrice` dựa trên OrdetItem cũ và DTO
+    const targetItem = order.items.find((item) => item.id === itemId)
+    if (!targetItem) {
+      throw new NotFoundException('OrderItem với itemId gửi lên không tồn tại')
+    }
+    const updatedItem = { ...targetItem.toObject(), ...updateOrderDto, updatedAt: new Date() }
+
+    let { totalPrice } = order
+    const totalPriceTargetItem = targetItem.quantity * targetItem.price
+    const totalPriceUpdatedItem = updatedItem.quantity * updatedItem.price
+
+    if (totalPriceTargetItem !== totalPriceUpdatedItem) {
+      totalPrice = totalPrice - totalPriceTargetItem + totalPriceUpdatedItem
+    }
+
+    // Cập nhật lại trạng thái của Table khi các OrderItem đã được hoàn thành
+    const isOrderCompleted = order.items.every((item) => [OrderStatus.Paid, OrderStatus.Rejected].includes(item.status))
+    if (isOrderCompleted) {
+      await this.tablesService.update(order.table.toString(), { status: TableStatus.Available })
+    }
+
+    return this.orderModel.findOneAndUpdate(
+      {
+        _id: id,
+        'items._id': itemId
+      },
+      {
+        $set: {
+          'items.$': updatedItem
+        },
+        totalPrice
+      },
+      {
+        returnOriginal: false
+      }
+    )
   }
 }

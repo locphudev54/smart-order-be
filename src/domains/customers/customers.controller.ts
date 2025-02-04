@@ -15,19 +15,20 @@ import { CustomerRoute } from 'core/decorators/customer-route.decorator'
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
-  // Chỉ có nhân viên mới có quyền tạo mới customer thông qua route này - còn chính bản thân customer thì phải cần tableToken khi login
+  // ------------------------------- EMPLOYEE'S ROUTES -----------------------------
   @Post()
   create(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customersService.create(createCustomerDto)
   }
 
+  // ------------------------------- CUSTOMER'S ROUTES -------------------------------
+  @CustomerRoute()
   @Post('orders')
   createOrder(@Body() createOrderDto: CreateOrderByCustomerDto, @Customer() customer: CustomerType) {
     return this.customersService.createOrder(createOrderDto, customer)
   }
 
-  // --------------------- CUSTOMER'S AUTH ROUTES -------------------
-
+  // ------------------------------- CUSTOMER'S AUTH ROUTES -------------------------------
   @Public()
   @UseGuards(LocalCustomerAuthGuard)
   @Post('auth/login')

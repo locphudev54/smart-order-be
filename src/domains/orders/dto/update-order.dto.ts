@@ -1,4 +1,10 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { CreateOrderDto } from './create-order.dto'
+import { IsMongoId, IsNotEmpty } from 'class-validator'
+import { OrderItemDto } from 'domains/orders/dto/order-item.dto'
+import { Types } from 'mongoose'
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+export class UpdateOrderDto extends PartialType(OrderItemDto) {
+  @IsMongoId({ message: 'itemId phải là định dạng ObjectId' })
+  @IsNotEmpty({ message: 'itemId không được bỏ trống' })
+  itemId: Types.ObjectId
+}

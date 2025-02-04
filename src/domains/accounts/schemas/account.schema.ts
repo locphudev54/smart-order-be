@@ -4,7 +4,7 @@ import { HydratedDocument, SchemaTypes, Types } from 'mongoose'
 
 export type AccountDocument = HydratedDocument<Account>
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false, collection: 'Accounts' })
 export class Account {
   @Prop({ type: SchemaTypes.ObjectId })
   _id: Types.ObjectId
@@ -19,11 +19,11 @@ export class Account {
   fullName: string
 
   @Prop({ default: '' })
-  avatarUrl: string
+  avatarUrl?: string
 
   // NOTE: Schema Prop: Array of Enum
   @Prop({ type: [{ type: String, enum: Role }], default: [Role.Waiter] })
-  role: Role[]
+  role?: Role[]
 
   @Prop({ default: '' })
   refreshToken: string

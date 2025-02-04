@@ -1,8 +1,15 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
 import { CreateCustomerDto } from './dto/create-customer.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Customer, CustomerDocument } from 'domains/customers/schemas/customer.schema'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { CustomerTokenPayload, CustomerType, TableTokenPayload } from 'core/types/type'
@@ -12,6 +19,7 @@ import { TableStatus } from 'core/constants/enum'
 import { RefreshTokenDto } from 'domains/customers/dto/refresh-token.dto'
 import { LogoutDto } from 'domains/customers/dto/logout.dto'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
+import { OrdersService } from 'domains/orders/orders.service'
 
 @Injectable()
 export class CustomersService {
@@ -19,20 +27,34 @@ export class CustomersService {
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly tablesService: TablesService
-    // private readonly ordersService: OrdersService
+    private readonly tablesService: TablesService,
+    @Inject(forwardRef(() => OrdersService))
+    private readonly ordersService: OrdersService
   ) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const { tableNumber } = createCustomerDto
+    const { tableNumber, name } = createCustomerDto
     const table = await this.tablesService.findTableByNumber(tableNumber)
+
     if (!table) {
       throw new BadRequestException('Bàn không tồn tại')
     }
-    return this.customerModel.create(createCustomerDto)
+    if (table.status !== TableStatus.Available) {
+      throw new BadRequestException('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
+    }
+    const [result] = await Promise.all([
+      this.customerModel.create({ name, table: table._id }),
+      this.tablesService.update(table._id.toString(), { status: TableStatus.Occupied })
+    ])
+
+    return result
   }
 
-  createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType) {}
+  createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType) {
+    const { items } = createOrderDto
+    const { _id: customerId } = customer
+    return this.ordersService.create({ customerId: new Types.ObjectId(customerId), items })
+  }
 
   async findOne(id: string) {
     const customer = await this.customerModel.findOne({ _id: id })
@@ -50,7 +72,7 @@ export class CustomersService {
   async validateCustomer(name: string, tableToken: string) {
     // Mục đích chính của việc validate khách hàng là kiểm tra xem tableToken gửi lên có hợp lệ hay không
     // Còn việc ktra tính duy nhất của tên khách hàng là không cần thiết
-    const { tableNumber } = await this.jwtService
+    await this.jwtService
       .verifyAsync<TableTokenPayload>(tableToken, {
         secret: this.configService.get('tableToken.secret')
       })
@@ -58,15 +80,20 @@ export class CustomersService {
         throw new BadRequestException('Vui lòng quét lại mã QR để đặt bàn')
       })
 
-    const tableWithNumber = await this.tablesService.findTableByNumber(tableNumber)
-    if (!tableWithNumber) {
+    const table = await this.tablesService.findTableByToken(tableToken)
+    if (!table) {
       throw new BadRequestException('Bàn không tồn tại')
     }
 
-    if (tableWithNumber.status !== TableStatus.Available) {
+    if (table.status !== TableStatus.Available) {
       throw new BadRequestException('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
-    return this.customerModel.create({ name, tableId: tableWithNumber._id })
+    const [result] = await Promise.all([
+      this.customerModel.create({ name, table: table._id }),
+      this.tablesService.update(table._id.toString(), { status: TableStatus.Occupied })
+    ])
+
+    return result
   }
 
   async login(customer: CustomerType) {
@@ -85,8 +112,15 @@ export class CustomersService {
 
   async logout(logoutDto: LogoutDto) {
     const { refreshToken } = logoutDto
-    await this.customerModel.updateOne({ refreshToken }, { refreshToken: '' })
-    return 'Ok'
+    const customer = await this.customerModel.findOne({ refreshToken })
+    if (!customer) {
+      throw new BadRequestException('Refresh token không hợp lệ')
+    }
+
+    await Promise.all([
+      this.customerModel.updateOne({ refreshToken }, { refreshToken: '' }),
+      this.tablesService.update(customer.table.toString(), { status: TableStatus.Available })
+    ])
   }
 
   async refreshToken(refreshTokenDto: RefreshTokenDto) {

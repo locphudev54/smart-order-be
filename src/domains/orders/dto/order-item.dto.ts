@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer'
 import {
+  IsEnum,
   IsInt,
   IsMongoId,
   IsNotEmpty,
@@ -10,6 +11,7 @@ import {
   Min,
   MinLength
 } from 'class-validator'
+import { OrderStatus } from 'core/constants/enum'
 import { Types } from 'mongoose'
 
 export class OrderItemDto {
@@ -17,13 +19,13 @@ export class OrderItemDto {
   @IsNotEmpty({ message: 'dishId không được bỏ trống' })
   dishId: Types.ObjectId
 
-  @Min(0, { message: 'quantity phải > 0' })
+  @Min(1, { message: 'quantity phải > 0' })
   @IsInt({ message: 'quantity phải là định dạng số nguyên' })
   @IsNotEmpty({ message: 'quantity không được bỏ trống' })
   @Transform(({ value }) => Number(value))
   quantity: number
 
-  @Min(0, { message: 'price phải > 0' })
+  @Min(1, { message: 'price phải > 0' })
   @IsNumber({ allowNaN: false }, { message: 'price phải là định dạng số' })
   @IsNotEmpty({ message: 'price không được bỏ trống' })
   @Transform(({ value }) => Number(value))
@@ -35,4 +37,10 @@ export class OrderItemDto {
   @Transform(({ value }) => value.trim())
   @IsOptional()
   note: string
+
+  @IsEnum(OrderStatus, {
+    message: `status phải là một trong những giá trị sau: ${OrderStatus.Canceled} || ${OrderStatus.Cooked} || ${OrderStatus.Paid} || ${OrderStatus.Processing} || ${OrderStatus.Rejected} || ${OrderStatus.Served}`
+  })
+  @IsOptional()
+  status?: OrderStatus
 }

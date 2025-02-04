@@ -98,8 +98,8 @@ export class AccountsService {
 
   /**
    *
-   * @param password password ở dạng plain text
-   * @param hashedPassword password đã được mã hóa
+   * @param password mật khẩu ở dạng plain text
+   * @param hashedPassword mật khẩu đã được mã hóa
    */
   comparePassword(password: string, hashedPassword: string) {
     return bcrypt.compare(password, hashedPassword)

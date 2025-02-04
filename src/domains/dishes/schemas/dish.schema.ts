@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { DishStatus } from 'core/constants/enum'
-import { HydratedDocument, Types } from 'mongoose'
+import { HydratedDocument } from 'mongoose'
 
 export type DishDocument = HydratedDocument<Dish>
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false, collection: 'Dishes' })
 export class Dish {
   @Prop({ required: true })
   title: string
@@ -19,7 +19,7 @@ export class Dish {
   status: DishStatus
 
   @Prop({ default: '' })
-  imageUrl: string
+  imageUrl?: string
 }
 
 export const DishSchema = SchemaFactory.createForClass(Dish)

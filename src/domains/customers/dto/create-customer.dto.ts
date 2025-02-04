@@ -9,7 +9,7 @@ export class CreateCustomerDto {
   @Transform(({ value }) => value.trim())
   name: string
 
-  @Min(0, { message: 'tableNumber phải > 0' })
+  @Min(1, { message: 'tableNumber phải > 0' })
   @IsInt({ message: 'tableNumber phải là định dạng số nguyên' })
   @IsNotEmpty({ message: 'tableNumber không được bỏ trống' })
   @Transform(({ value }) => Number(value))

@@ -158,7 +158,6 @@ export class AuthService {
     const { refreshToken } = logoutDto
     const decodedRefreshToken = this.jwtService.decode<AuthTokenPayload>(refreshToken)
     await this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
-    return 'OK'
   }
 
   signAccessToken(payload: AccountType) {

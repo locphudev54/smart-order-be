@@ -1,19 +1,29 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { OrderStatus } from 'core/constants/enum'
 import mongoose, { Types } from 'mongoose'
 
-@Schema()
+@Schema({ versionKey: false })
 export class OrderItem {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Dish' })
-  dishId: Types.ObjectId
+  dish: Types.ObjectId
 
-  @Prop()
+  @Prop({ required: true })
   quantity: number
 
-  @Prop()
+  @Prop({ required: true })
   price: number
 
   @Prop({ required: true })
   note: string
+
+  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Processing })
+  status?: OrderStatus
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt?: string
+
+  @Prop({ type: Date, default: Date.now })
+  updatedAt?: string
 }
 
 export const OrderItemSchema = SchemaFactory.createForClass(OrderItem)

@@ -3,16 +3,16 @@ import mongoose, { HydratedDocument, Types } from 'mongoose'
 
 export type CustomerDocument = HydratedDocument<Customer>
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false, collection: 'Customers' })
 export class Customer {
   @Prop({ required: true })
   name: string
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Table' })
-  tableId: Types.ObjectId
+  table: Types.ObjectId
 
   @Prop({ default: '' })
-  refreshToken: string
+  refreshToken?: string
 }
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer)

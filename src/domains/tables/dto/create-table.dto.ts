@@ -3,13 +3,13 @@ import { IsEnum, IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator'
 import { TableStatus } from 'core/constants/enum'
 
 export class CreateTableDto {
-  @Min(0, { message: 'number phải > 0' })
+  @Min(1, { message: 'number phải > 0' })
   @IsInt({ message: 'number phải là định dạng số nguyên' })
   @IsNotEmpty({ message: 'number không được bỏ trống' })
   @Transform(({ value }) => Number(value))
   number: number
 
-  @Min(0, { message: 'capacity phải > 0' })
+  @Min(1, { message: 'capacity phải > 0' })
   @IsInt({ message: 'capacity phải là định dạng số nguyên' })
   @IsNotEmpty({ message: 'capacity không được bỏ trống' })
   @Transform(({ value }) => Number(value))

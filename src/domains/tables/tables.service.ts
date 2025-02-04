@@ -73,6 +73,10 @@ export class TablesService {
     return this.tableModel.findOne({ number })
   }
 
+  findTableByToken(token: string) {
+    return this.tableModel.findOne({ token })
+  }
+
   async update(id: string, updateTableDto: UpdateTableDto) {
     const { changeToken, number } = updateTableDto
 

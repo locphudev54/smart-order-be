@@ -15,7 +15,7 @@ export class CreateDishDto {
   @Transform(({ value }) => value.trim())
   description: string
 
-  @Min(0, { message: 'price phải > 0' })
+  @Min(1, { message: 'price phải > 0' })
   @IsNumber({ allowNaN: false }, { message: 'price phải là định dạng số' })
   @IsNotEmpty({ message: 'price không được bỏ trống' })
   @Transform(({ value }) => Number(value))

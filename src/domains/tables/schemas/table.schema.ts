@@ -4,7 +4,7 @@ import { HydratedDocument } from 'mongoose'
 
 export type TableDocument = HydratedDocument<Table>
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false, collection: 'Tables' })
 export class Table {
   @Prop({ required: true, unique: true })
   number: number

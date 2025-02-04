@@ -13,6 +13,6 @@ export class LocalCustomerStrategy extends PassportStrategy(Strategy, 'local-cus
   async validate(name: string, tableToken: string): Promise<CustomerType> {
     const customer = await this.customersService.validateCustomer(name, tableToken)
     // Gán vào req.user
-    return { _id: customer._id.toString(), name: customer.name, tableId: customer.tableId.toString() }
+    return { _id: customer._id.toString(), name: customer.name, tableId: customer.table.toString() }
   }
 }
