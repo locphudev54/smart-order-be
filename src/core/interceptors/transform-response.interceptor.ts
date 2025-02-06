@@ -26,7 +26,7 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<T, Respo
         if (!response) {
           return {
             statusCode,
-            message: responseMessage ?? 'Không có dữ liệu trả về',
+            message: 'Không có dữ liệu trả về',
             data: []
           }
         }

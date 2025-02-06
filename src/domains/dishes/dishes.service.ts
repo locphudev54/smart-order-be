@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { CreateDishDto } from './dto/create-dish.dto'
 import { UpdateDishDto } from './dto/update-dish.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -6,6 +6,7 @@ import { Dish, DishDocument } from 'domains/dishes/schemas/dish.schema'
 import { Model } from 'mongoose'
 import { QueryType } from 'core/types/type'
 import aqp from 'api-query-params'
+import { NotFoundError } from 'core/exceptions/errors.exception'
 
 @Injectable()
 export class DishesService {
@@ -34,14 +35,14 @@ export class DishesService {
         .populate(population),
       this.dishModel.find(filter)
     ])
-    const totalPage = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocument.length / result.length)
 
     return {
       data: result,
       meta: {
         page,
         limit: result.length,
-        totalPage
+        totalPages
       }
     }
   }
@@ -49,7 +50,7 @@ export class DishesService {
   async findOne(id: string) {
     const dish = await this.dishModel.findById(id)
     if (!dish) {
-      throw new NotFoundException('Món ăn không tồn tại')
+      throw new NotFoundError('Món ăn không tồn tại')
     }
     return dish
   }
@@ -57,7 +58,7 @@ export class DishesService {
   async update(id: string, updateDishDto: UpdateDishDto) {
     const dish = await this.dishModel.findById(id)
     if (!dish) {
-      throw new NotFoundException('Món ăn không tồn tại')
+      throw new NotFoundError('Món ăn không tồn tại')
     }
     return this.dishModel.updateOne({ _id: id }, updateDishDto)
   }
@@ -65,7 +66,7 @@ export class DishesService {
   async remove(id: string) {
     const dish = await this.dishModel.findById(id)
     if (!dish) {
-      throw new NotFoundException('Món ăn không tồn tại')
+      throw new NotFoundError('Món ăn không tồn tại')
     }
     return this.dishModel.deleteOne({ _id: id })
   }

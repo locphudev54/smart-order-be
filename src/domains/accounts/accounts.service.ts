@@ -1,10 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Account, AccountDocument } from 'domains/accounts/schemas/account.schema'
 import mongoose, { Model } from 'mongoose'
 import * as bcrypt from 'bcrypt'
+import { NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.exception'
+import { QueryType } from 'core/types/type'
+import aqp from 'api-query-params'
 
 @Injectable()
 export class AccountsService {
@@ -14,7 +17,7 @@ export class AccountsService {
   async create(createAccountDto: CreateAccountDto & { _id?: string }) {
     const isExistAccount = await this.accountModel.findOne({ email: createAccountDto.email })
     if (isExistAccount) {
-      throw new BadRequestException('Email này đã tồn tại trên hệ thống')
+      throw new UnprocessableEntityError([{ field: 'email', message: 'Email này đã tồn tại trên hệ thống' }])
     }
 
     const hashedPassword = await this.hashPassword(createAccountDto.password)
@@ -33,14 +36,41 @@ export class AccountsService {
     }
   }
 
-  findAll() {
-    return this.accountModel.find()
+  async findAll(qs: QueryType) {
+    const page = Number(qs.page) || 1
+    const limit = Number(qs.limit) || 10
+    delete qs.page
+    delete qs.limit
+
+    const skip = (page - 1) * limit
+    const { filter, sort, population } = aqp(qs)
+
+    const [result, totalDocument] = await Promise.all([
+      this.accountModel
+        .find(filter)
+        .skip(skip)
+        .limit(limit)
+        .sort(sort as any)
+        .select(['-password', '-refreshToken'])
+        .populate(population),
+      this.accountModel.find(filter)
+    ])
+    const totalPages = Math.ceil(totalDocument.length / result.length)
+
+    return {
+      data: result,
+      meta: {
+        page,
+        limit: result.length,
+        totalPages
+      }
+    }
   }
 
   async findOne(id: string) {
     const account = await this.accountModel.findOne({ _id: id })
     if (!account) {
-      throw new NotFoundException('Tài khoản không tồn tại')
+      throw new NotFoundError('Tài khoản không tồn tại')
     }
     return this.accountModel.findById(id)
   }
@@ -64,7 +94,7 @@ export class AccountsService {
   async update(id: string, updateAccountDto: UpdateAccountDto) {
     const account = await this.accountModel.findOne({ _id: id })
     if (!account) {
-      throw new NotFoundException('Tài khoản không tồn tại')
+      throw new NotFoundError('Tài khoản không tồn tại')
     }
     return this.accountModel.updateOne({ _id: id }, { ...updateAccountDto })
   }
@@ -86,7 +116,7 @@ export class AccountsService {
   async remove(id: string) {
     const account = await this.accountModel.findOne({ _id: id })
     if (!account) {
-      throw new NotFoundException('Tài khoản không tồn tại')
+      throw new NotFoundError('Tài khoản không tồn tại')
     }
     return this.accountModel.deleteOne({ _id: id })
   }

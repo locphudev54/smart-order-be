@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { Role } from 'core/constants/enum'
+import { BadRequestError, NotFoundError, UnauthorizedError } from 'core/exceptions/errors.exception'
 import { AccountType, AuthTokenPayload } from 'core/types/type'
 import { AccountsService } from 'domains/accounts/accounts.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
@@ -56,14 +57,14 @@ export class AuthService {
         _id: accountId.toString(),
         email,
         fullName,
-        role: [Role.Waiter],
+        role: Role.Waiter,
         avatarUrl: ''
       }),
       this.signRefreshToken({
         _id: accountId.toString(),
         email,
         fullName,
-        role: [Role.Waiter],
+        role: Role.Waiter,
         avatarUrl: ''
       })
     ])
@@ -91,7 +92,7 @@ export class AuthService {
     try {
       const account = await this.accountsService.findByRefreshToken(refreshTokenDto.refreshToken)
       if (!account || !refreshTokenDto.refreshToken) {
-        throw new UnauthorizedException('Refresh token không hợp lệ')
+        throw new UnauthorizedError('Refresh token không hợp lệ')
       }
 
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshTokenDto.refreshToken, {
@@ -112,7 +113,7 @@ export class AuthService {
       }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedException('Refresh token hết hạn')
+        throw new UnauthorizedError('Refresh token hết hạn')
       }
       throw error
     }
@@ -122,7 +123,7 @@ export class AuthService {
     const { email, password } = forgotPasswordDto
     const account = await this.accountsService.findByEmail(email)
     if (!account) {
-      throw new NotFoundException('Email không tồn tại trên hệ thống')
+      throw new NotFoundError('Email không tồn tại trên hệ thống')
     }
     return this.accountsService.updatePassword(account._id.toString(), password)
   }
@@ -132,12 +133,12 @@ export class AuthService {
 
     const accountDocument = await this.accountsService.findByEmail(account.email)
     if (!accountDocument) {
-      throw new NotFoundException('Tài khoản không tồn tại trên hệ thống')
+      throw new NotFoundError('Tài khoản không tồn tại trên hệ thống')
     }
 
     const isMatchPassowrd = await this.accountsService.comparePassword(oldPassword, accountDocument.password)
     if (!isMatchPassowrd) {
-      throw new BadRequestException('Mật khẩu cũ không chính xác')
+      throw new BadRequestError('Mật khẩu cũ không chính xác')
     }
 
     const payload = account

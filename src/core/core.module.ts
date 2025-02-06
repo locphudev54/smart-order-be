@@ -1,7 +1,7 @@
-import { Module, UnprocessableEntityException, ValidationPipe } from '@nestjs/common'
+import { Module, ValidationPipe } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import Joi from 'joi'
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
 import { client, database, environment, port, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
@@ -12,6 +12,9 @@ import { extractErrorMessageFromDto } from 'core/utils/utils'
 import { JwtEmployeeAuthGuard } from 'core/guards/jwt-employee-auth.guard'
 import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
 import { JwtAuthenticatedAuthGuard } from 'core/guards/jwt-authenticated-auth-.guard'
+import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
+import HttpExceptionFilter from 'core/exceptions/http-exception-filter'
+import AnyExceptionFilter from 'core/exceptions/any-exception-filter'
 
 @Module({
   imports: [
@@ -45,27 +48,6 @@ import { JwtAuthenticatedAuthGuard } from 'core/guards/jwt-authenticated-auth-.g
   ],
   providers: [
     {
-      provide: APP_INTERCEPTOR,
-      useClass: TransformResponseInterceptor
-    },
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        stopAtFirstError: true,
-        exceptionFactory: (validationErrors: ValidationError[] = []) => {
-          const errorMessage = extractErrorMessageFromDto(validationErrors)
-          return new UnprocessableEntityException(
-            validationErrors.map((error, index) => ({
-              field: error.property,
-              message: errorMessage[index]
-            }))
-          )
-        }
-      })
-    },
-    {
       provide: APP_GUARD,
       useClass: JwtEmployeeAuthGuard
     },
@@ -80,7 +62,36 @@ import { JwtAuthenticatedAuthGuard } from 'core/guards/jwt-authenticated-auth-.g
     {
       provide: APP_GUARD,
       useClass: RolesGuard
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformResponseInterceptor
+    },
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        stopAtFirstError: true,
+        exceptionFactory: (validationErrors: ValidationError[] = []) => {
+          const errorMessage = extractErrorMessageFromDto(validationErrors)
+          return new UnprocessableEntityError(
+            validationErrors.map((error, index) => ({
+              field: error.property,
+              message: errorMessage[index]
+            }))
+          )
+        }
+      })
     }
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter
+    // },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: AnyExceptionFilter
+    // }
   ],
   exports: []
 })

@@ -1,10 +1,11 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
+import { ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { TokenExpiredError } from '@nestjs/jwt'
 import { AuthGuard } from '@nestjs/passport'
 import { IS_AUTHENTICATED_USER_ACCESS } from 'core/decorators/authenticated-user-access.decorator'
 import { IS_CUSTOMER_ROUTE } from 'core/decorators/customer-route.decorator'
 import { IS_PUBLIC_KEY } from 'core/decorators/public.decorator'
+import { UnauthorizedError } from 'core/exceptions/errors.exception'
 import { Request } from 'express'
 
 // Auth guard này tương tự với OrGuard (tự động xác định accessToken secret thích hợp để decode)
@@ -37,7 +38,7 @@ export class JwtAuthenticatedAuthGuard extends AuthGuard(['jwt-customer', 'jwt-e
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
     if (!token) {
-      throw new UnauthorizedException('Không nhận được Access Token')
+      throw new UnauthorizedError('Không nhận được Access Token')
     }
 
     return super.canActivate(context)
@@ -50,11 +51,11 @@ export class JwtAuthenticatedAuthGuard extends AuthGuard(['jwt-customer', 'jwt-e
 
   handleRequest(err, user, info) {
     if (info instanceof TokenExpiredError) {
-      throw new UnauthorizedException('Access Token hết hạn')
+      throw new UnauthorizedError('Access Token hết hạn')
     }
 
     if (err || !user) {
-      throw err || new UnauthorizedException('Access Token không hợp lệ')
+      throw err || new UnauthorizedError('Access Token không hợp lệ')
     }
     return user
   }

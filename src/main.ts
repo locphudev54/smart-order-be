@@ -29,6 +29,8 @@ async function bootstrap() {
     prefix: '/public/'
   })
 
+  app.enableCors({ origin: '*' })
+
   await app.listen(port)
 }
 bootstrap()

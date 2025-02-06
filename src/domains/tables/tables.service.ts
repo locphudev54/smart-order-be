@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { QueryType } from 'core/types/type'
@@ -8,6 +8,7 @@ import { UpdateTableDto } from 'domains/tables/dto/update-table.dto'
 import { Table, TableDocument } from 'domains/tables/schemas/table.schema'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
+import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
 
 @Injectable()
 export class TablesService {
@@ -21,7 +22,7 @@ export class TablesService {
     const { number } = createTableDto
     const tableWithNumber = await this.findTableByNumber(number)
     if (tableWithNumber) {
-      throw new BadRequestException(`Bàn ăn với số hiệu ${number} đã tồn tại`)
+      throw new BadRequestError(`Bàn ăn với số hiệu ${number} đã tồn tại`)
     }
 
     const token = await this.signTableToken(number)
@@ -49,14 +50,14 @@ export class TablesService {
         .populate(population),
       this.tableModel.find(filter)
     ])
-    const totalPage = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocument.length / result.length)
 
     return {
       data: result,
       meta: {
         page,
         limit: result.length,
-        totalPage
+        totalPages
       }
     }
   }
@@ -64,7 +65,7 @@ export class TablesService {
   async findOne(id: string) {
     const table = await this.tableModel.findById(id)
     if (!table) {
-      throw new NotFoundException('Bàn không tồn tại')
+      throw new NotFoundError('Bàn không tồn tại')
     }
     return table
   }
@@ -82,7 +83,7 @@ export class TablesService {
 
     const tableUpdate = await this.tableModel.findById(id)
     if (!tableUpdate) {
-      throw new NotFoundException('Bàn không tồn tại')
+      throw new NotFoundError('Bàn không tồn tại')
     }
 
     const tableWithNumber = await this.findTableByNumber(number)
@@ -109,7 +110,7 @@ export class TablesService {
   async remove(id: string) {
     const table = await this.tableModel.findById(id)
     if (!table) {
-      throw new NotFoundException('Bàn không tồn tại')
+      throw new NotFoundError('Bàn không tồn tại')
     }
     return this.tableModel.deleteOne({ _id: id })
   }

@@ -1,8 +1,9 @@
+import { Injectable } from '@nestjs/common'
 import { Strategy } from 'passport-local'
 import { PassportStrategy } from '@nestjs/passport'
-import { Injectable, UnprocessableEntityException } from '@nestjs/common'
 import { AuthService } from 'domains/auth/auth.service'
 import { AccountType } from 'core/types/type'
+import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
 
 @Injectable()
 export class LocalEmployeeStrategy extends PassportStrategy(Strategy, 'local-employee') {
@@ -13,7 +14,7 @@ export class LocalEmployeeStrategy extends PassportStrategy(Strategy, 'local-emp
   async validate(email: string, password: string): Promise<AccountType> {
     const account = await this.authService.validateAccount(email, password)
     if (!account) {
-      throw new UnprocessableEntityException('Email/Password không tồn tại trên hệ thống')
+      throw new UnprocessableEntityError([{ field: 'password', message: 'Email/Password không tồn tại trên hệ thống' }])
     }
 
     // Gán vào req.user

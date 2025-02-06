@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common'
 import { CustomersService } from './customers.service'
 import { CreateCustomerDto } from './dto/create-customer.dto'
 import { Public } from 'core/decorators/public.decorator'
@@ -26,6 +26,12 @@ export class CustomersController {
   @Post('orders')
   createOrder(@Body() createOrderDto: CreateOrderByCustomerDto, @Customer() customer: CustomerType) {
     return this.customersService.createOrder(createOrderDto, customer)
+  }
+
+  @CustomerRoute()
+  @Get('orders')
+  getOrders(@Customer() customer: CustomerType) {
+    return this.customersService.findOrders(customer)
   }
 
   // ------------------------------- CUSTOMER'S AUTH ROUTES -------------------------------

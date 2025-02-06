@@ -38,13 +38,19 @@ export class CreateAccountDto {
   avatarUrl?: string // ? Tác dụng cho TS check
 
   // NOTE: VALIDATE ARRAY OF ENUM
-  @ArrayUnique({ message: 'Các giá trị trong role phải khác nhau' })
+  // @ArrayUnique({ message: 'Các giá trị trong role phải khác nhau' })
+  // @IsEnum(Role, {
+  //   each: true,
+  //   message: `role phải chỉ gồm một trong những giá trị sau: ${Role.Chef} || ${Role.Manager} || ${Role.Waiter}`
+  // })
+  // @ArrayMinSize(1, { message: 'role phải có ít nhất một vai trò' })
+  // @IsArray({ message: 'role phải là một mảng các vai trò' })
+  // @IsOptional()
+  // role?: Role
+
   @IsEnum(Role, {
-    each: true,
-    message: `role phải chỉ gồm một trong những giá trị sau: ${Role.Chef} || ${Role.Manager} || ${Role.Waiter}`
+    message: `role phải là một trong những giá trị sau: ${Role.Chef} || ${Role.Manager} || ${Role.Manager}`
   })
-  @ArrayMinSize(1, { message: 'role phải có ít nhất một vai trò' })
-  @IsArray({ message: 'role phải là một mảng các vai trò' })
   @IsOptional()
   role?: Role
 

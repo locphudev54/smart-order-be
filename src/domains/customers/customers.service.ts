@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { CreateCustomerDto } from './dto/create-customer.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Customer, CustomerDocument } from 'domains/customers/schemas/customer.schema'
@@ -20,6 +13,7 @@ import { RefreshTokenDto } from 'domains/customers/dto/refresh-token.dto'
 import { LogoutDto } from 'domains/customers/dto/logout.dto'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 import { OrdersService } from 'domains/orders/orders.service'
+import { BadRequestError, NotFoundError, UnauthorizedError } from 'core/exceptions/errors.exception'
 
 @Injectable()
 export class CustomersService {
@@ -37,10 +31,10 @@ export class CustomersService {
     const table = await this.tablesService.findTableByNumber(tableNumber)
 
     if (!table) {
-      throw new BadRequestException('Bàn không tồn tại')
+      throw new BadRequestError('Bàn không tồn tại')
     }
     if (table.status !== TableStatus.Available) {
-      throw new BadRequestException('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
+      throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
     const [result] = await Promise.all([
       this.customerModel.create({ name, table: table._id }),
@@ -56,10 +50,15 @@ export class CustomersService {
     return this.ordersService.create({ customerId: new Types.ObjectId(customerId), items })
   }
 
+  async findOrders(customer: CustomerType) {
+    const { _id } = customer
+    return this.ordersService.findAll({ customer: '67a193e6503ef5f6122dcfbe' })
+  }
+
   async findOne(id: string) {
     const customer = await this.customerModel.findOne({ _id: id })
     if (!customer) {
-      throw new NotFoundException('Khách hàng không tồn tại')
+      throw new NotFoundError('Khách hàng không tồn tại')
     }
     return customer
   }
@@ -77,16 +76,16 @@ export class CustomersService {
         secret: this.configService.get('tableToken.secret')
       })
       .catch(() => {
-        throw new BadRequestException('Vui lòng quét lại mã QR để đặt bàn')
+        throw new BadRequestError('Vui lòng quét lại mã QR để đặt bàn')
       })
 
     const table = await this.tablesService.findTableByToken(tableToken)
     if (!table) {
-      throw new BadRequestException('Bàn không tồn tại')
+      throw new BadRequestError('Bàn không tồn tại')
     }
 
     if (table.status !== TableStatus.Available) {
-      throw new BadRequestException('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
+      throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
     const [result] = await Promise.all([
       this.customerModel.create({ name, table: table._id }),
@@ -114,7 +113,7 @@ export class CustomersService {
     const { refreshToken } = logoutDto
     const customer = await this.customerModel.findOne({ refreshToken })
     if (!customer) {
-      throw new BadRequestException('Refresh token không hợp lệ')
+      throw new BadRequestError('Refresh token không hợp lệ')
     }
 
     await Promise.all([
@@ -128,7 +127,7 @@ export class CustomersService {
       const { refreshToken } = refreshTokenDto
       const customer = await this.findByRefreshToken(refreshToken)
       if (!customer || !refreshToken) {
-        throw new UnauthorizedException('Refresh Token không hợp lệ')
+        throw new UnauthorizedError('Refresh Token không hợp lệ')
       }
 
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<CustomerTokenPayload>(refreshToken, {
@@ -148,7 +147,7 @@ export class CustomersService {
       }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedException('Refresh token hết hạn')
+        throw new UnauthorizedError('Refresh token hết hạn')
       }
       throw error
     }

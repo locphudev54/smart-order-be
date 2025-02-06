@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -10,6 +10,7 @@ import { QueryType } from 'core/types/type'
 import { OrderItem } from 'domains/orders/schemas/order-item.schema'
 import { OrderStatus, TableStatus } from 'core/constants/enum'
 import { TablesService } from 'domains/tables/tables.service'
+import { NotFoundError } from 'core/exceptions/errors.exception'
 
 @Injectable()
 export class OrdersService {
@@ -89,14 +90,14 @@ export class OrdersService {
         ]),
       this.orderModel.find(filter)
     ])
-    const totalPage = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocument.length / result.length)
 
     return {
       data: result,
       meta: {
         page,
         limit: result.length,
-        totalPage
+        totalPages
       }
     }
   }
@@ -111,7 +112,7 @@ export class OrdersService {
       }
     ])
     if (!order) {
-      throw new NotFoundException('Đơn hàng không tồn tại')
+      throw new NotFoundError('Đơn hàng không tồn tại')
     }
     return order
   }
@@ -120,13 +121,13 @@ export class OrdersService {
     const { itemId } = updateOrderDto
     const order = await this.orderModel.findOne({ _id: id })
     if (!order) {
-      throw new NotFoundException('Đơn hàng không tồn tại')
+      throw new NotFoundError('Đơn hàng không tồn tại')
     }
 
     // Tạo ra OrderItem mới & Tính toán lại `totalPrice` dựa trên OrdetItem cũ và DTO
     const targetItem = order.items.find((item) => item.id === itemId)
     if (!targetItem) {
-      throw new NotFoundException('OrderItem với itemId gửi lên không tồn tại')
+      throw new NotFoundError('OrderItem với itemId gửi lên không tồn tại')
     }
     const updatedItem = { ...targetItem.toObject(), ...updateOrderDto, updatedAt: new Date() }
 
