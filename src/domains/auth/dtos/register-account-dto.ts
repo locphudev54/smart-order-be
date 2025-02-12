@@ -6,7 +6,7 @@ export class RegisterAccountDto {
   @IsString({ message: 'fullname phải là kiểu dữ liệu là string' })
   @MinLength(8, { message: 'fullname phải có ít nhất 8 kí tự' })
   @IsNotEmpty({ message: 'fullname không được bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   fullName: string
 
   @IsEmail({}, { message: 'email không đúng định dạng' })
@@ -17,6 +17,6 @@ export class RegisterAccountDto {
   @MinLength(8, { message: 'password phải có ít nhất 8 kí tự' })
   @IsString({ message: 'password phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'password không được bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   password: string
 }

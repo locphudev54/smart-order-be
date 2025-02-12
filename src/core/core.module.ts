@@ -1,26 +1,21 @@
 import { Module, ValidationPipe } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import Joi from 'joi'
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
-import { client, database, environment, port, token, upload } from 'config'
+import { client, database, environment, port, server, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
 import { ValidationError } from 'class-validator'
-import { RolesGuard } from 'core/guards/roles.guard'
 import { CaslModule } from './casl/casl.module'
 import { extractErrorMessageFromDto } from 'core/utils/utils'
 import { JwtEmployeeAuthGuard } from 'core/guards/jwt-employee-auth.guard'
-import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
-import { JwtAuthenticatedAuthGuard } from 'core/guards/jwt-authenticated-auth-.guard'
 import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
-import HttpExceptionFilter from 'core/exceptions/http-exception-filter'
-import AnyExceptionFilter from 'core/exceptions/any-exception-filter'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [environment, port, database, token, upload, client],
+      load: [environment, port, database, token, upload, client, server],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PORT: Joi.number().port().required(),
@@ -35,7 +30,8 @@ import AnyExceptionFilter from 'core/exceptions/any-exception-filter'
         CUSTOMER_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         CUSTOMER_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         CUSTOMER_ACCESS_TOKEN_SECRET: Joi.string().required(),
-        CUSTOMER_REFRESH_TOKEN_SECRET: Joi.string().required()
+        CUSTOMER_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        SERVER_BASE_URL: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({
@@ -51,18 +47,10 @@ import AnyExceptionFilter from 'core/exceptions/any-exception-filter'
       provide: APP_GUARD,
       useClass: JwtEmployeeAuthGuard
     },
-    {
-      provide: APP_GUARD,
-      useClass: JwtCustomerAuthGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthenticatedAuthGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard
+    // },
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformResponseInterceptor

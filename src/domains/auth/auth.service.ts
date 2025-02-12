@@ -92,7 +92,7 @@ export class AuthService {
     try {
       const account = await this.accountsService.findByRefreshToken(refreshTokenDto.refreshToken)
       if (!account || !refreshTokenDto.refreshToken) {
-        throw new UnauthorizedError('Refresh token không hợp lệ')
+        throw new UnauthorizedError('Refresh Token không hợp lệ')
       }
 
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshTokenDto.refreshToken, {
@@ -113,7 +113,7 @@ export class AuthService {
       }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedError('Refresh token hết hạn')
+        throw new UnauthorizedError('Refresh Token hết hạn')
       }
       throw error
     }
@@ -156,9 +156,18 @@ export class AuthService {
   }
 
   async logout(logoutDto: LogoutDto) {
-    const { refreshToken } = logoutDto
-    const decodedRefreshToken = this.jwtService.decode<AuthTokenPayload>(refreshToken)
-    await this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
+    try {
+      const { refreshToken } = logoutDto
+      const decodedRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshToken, {
+        secret: this.configService.get<string>('employeeRefreshToken.secret')
+      })
+      await this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedError('Refresh Token hết hạn')
+      }
+      throw error
+    }
   }
 
   signAccessToken(payload: AccountType) {
@@ -170,11 +179,12 @@ export class AuthService {
 
   signRefreshToken(payload: AccountType, exp?: number) {
     if (exp) {
-      const expiresIn = Math.ceil((new Date(exp * 1000).getTime() - new Date().getTime()) / 1000)
-      return this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('employeeRefreshToken.secret'),
-        expiresIn
-      })
+      return this.jwtService.signAsync(
+        { ...payload, exp },
+        {
+          secret: this.configService.get<string>('employeeRefreshToken.secret')
+        }
+      )
     }
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('employeeRefreshToken.secret'),

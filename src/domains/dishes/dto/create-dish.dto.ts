@@ -7,12 +7,12 @@ export class CreateDishDto {
   @MinLength(2, { message: 'title phải có ít nhất 2 kí tự' })
   @IsString({ message: 'title phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'title không được  bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   title: string
 
   @IsString({ message: 'description phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'description không được  bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   description: string
 
   @Min(1, { message: 'price phải > 0' })
@@ -29,6 +29,6 @@ export class CreateDishDto {
 
   @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
   @IsOptional() // Tác dụng khi gọi API
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   imageUrl?: string // ? Tác dụng cho TS check
 }

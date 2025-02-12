@@ -10,6 +10,7 @@ import { LogoutDto } from 'domains/customers/dto/logout.dto'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 import { Customer } from 'core/decorators/customer.decorator'
 import { CustomerRoute } from 'core/decorators/customer-route.decorator'
+import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
 
 @Controller('customers')
 export class CustomersController {
@@ -22,12 +23,14 @@ export class CustomersController {
   }
 
   // ------------------------------- CUSTOMER'S ROUTES -------------------------------
+  @UseGuards(JwtCustomerAuthGuard)
   @CustomerRoute()
   @Post('orders')
   createOrder(@Body() createOrderDto: CreateOrderByCustomerDto, @Customer() customer: CustomerType) {
     return this.customersService.createOrder(createOrderDto, customer)
   }
 
+  @UseGuards(JwtCustomerAuthGuard)
   @CustomerRoute()
   @Get('orders')
   getOrders(@Customer() customer: CustomerType) {
@@ -45,7 +48,7 @@ export class CustomersController {
 
   @Public()
   @Post('auth/refresh-token')
-  @ResponseMessage('Refresh token thành công')
+  @ResponseMessage('Refresh Token thành công')
   refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.customersService.refreshToken(refreshTokenDto)
   }

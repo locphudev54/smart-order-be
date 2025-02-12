@@ -13,3 +13,15 @@ export const extractErrorMessageFromDto = (errors: ValidationError[]): string[] 
   })
   return messages
 }
+
+export const createMediaUrl = ({
+  baseUrl,
+  filename,
+  folderName = 'tmp'
+}: {
+  baseUrl: string
+  folderName?: string
+  filename: string
+}) => {
+  return `${baseUrl}/public/${folderName}/${filename}`
+}

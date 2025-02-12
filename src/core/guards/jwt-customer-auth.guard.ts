@@ -19,17 +19,7 @@ export class JwtCustomerAuthGuard extends AuthGuard('jwt-customer') {
       context.getClass()
     ])
 
-    const isCustomerRoutes = this.reflector.getAllAndOverride<boolean>(IS_CUSTOMER_ROUTE, [
-      context.getHandler(),
-      context.getClass()
-    ])
-
-    const isAuthenticatedUserAccess = this.reflector.getAllAndOverride<boolean>(IS_AUTHENTICATED_USER_ACCESS, [
-      context.getHandler(),
-      context.getClass()
-    ])
-
-    if (isPublic || !isCustomerRoutes || isAuthenticatedUserAccess) {
+    if (isPublic) {
       return true
     }
 

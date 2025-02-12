@@ -1,6 +1,19 @@
-import { Body, Controller, Delete, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Post,
+  Request,
+  UploadedFile,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
+} from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { AuthenticatedUserAccess } from 'core/decorators/authenticated-user-access.decorator'
+import { JwtAuthenticatedAuthGuard } from 'core/guards/jwt-authenticated-auth-.guard'
+import { createMediaUrl } from 'core/utils/utils'
 import { MediaService } from 'domains/media/media.service'
 import { createMulterOptions } from 'domains/media/multer.options'
 
@@ -9,17 +22,27 @@ const MAX_COUNT_UPLOAD_MULTIPLE_FILE = 10
 const LIMIT_UPLOAD_MULTIPLE_FILE = MAX_COUNT_UPLOAD_MULTIPLE_FILE * LIMIT_UPLOAD_SINGLE_FILE
 
 @Controller('media')
+@UseGuards(JwtAuthenticatedAuthGuard)
 export class MediaController {
-  constructor(private readonly mediaService: MediaService) {}
+  constructor(
+    private readonly mediaService: MediaService,
+    private readonly configService: ConfigService
+  ) {}
 
   @AuthenticatedUserAccess()
   @Post('/upload/single')
   @UseInterceptors(FileInterceptor('file', createMulterOptions(LIMIT_UPLOAD_SINGLE_FILE))) // file: key trong object FormData truyền lên (formData.append('file', YOUR_FILE))
   uploadSingleFile(
+    @Request() req: Request,
     @UploadedFile()
     file: Express.Multer.File
   ) {
-    const result = file.filename
+    const folderName = req.headers['folder-name']
+    const result = createMediaUrl({
+      baseUrl: this.configService.get<string>('server.baseUrl'),
+      filename: file.filename,
+      folderName
+    })
     return {
       result
     }

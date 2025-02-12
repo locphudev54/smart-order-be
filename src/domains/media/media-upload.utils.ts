@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common'
 import { extname } from 'path'
 
 export const imageFileFilter = (req, file: Express.Multer.File, callback) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
     return callback(new BadRequestException(`Không hỗ trợ tải file có định dạng ${extname(file.originalname)}`), false)
   }
   callback(null, true)

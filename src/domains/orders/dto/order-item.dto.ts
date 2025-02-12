@@ -34,7 +34,7 @@ export class OrderItemDto {
   @MaxLength(100, { message: 'note không được vượt quá 100 kí tự' })
   @MinLength(1, { message: 'note phải có ít nhất 1 kí tự' })
   @IsString({ message: 'note phải là kiểu dữ liệu là string' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   @IsOptional()
   note: string
 

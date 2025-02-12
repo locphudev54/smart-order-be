@@ -10,6 +10,6 @@ export class ForgotPasswordtDto {
   @MinLength(6, { message: 'password phải có ít nhất 6 kí tự' })
   @IsString({ message: 'password phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'password không được bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   password: string
 }

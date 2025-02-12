@@ -113,7 +113,7 @@ export class CustomersService {
     const { refreshToken } = logoutDto
     const customer = await this.customerModel.findOne({ refreshToken })
     if (!customer) {
-      throw new BadRequestError('Refresh token không hợp lệ')
+      throw new BadRequestError('Refresh Token không hợp lệ')
     }
 
     await Promise.all([
@@ -147,7 +147,7 @@ export class CustomersService {
       }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedError('Refresh token hết hạn')
+        throw new UnauthorizedError('Refresh Token hết hạn')
       }
       throw error
     }
@@ -162,11 +162,12 @@ export class CustomersService {
 
   signCustomerRefreshToken(payload: CustomerType, exp?: number) {
     if (exp) {
-      const expiresIn = Math.ceil((new Date(exp * 1000).getTime() - new Date().getTime()) / 1000)
-      return this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('customerRefreshToken.secret'),
-        expiresIn
-      })
+      return this.jwtService.signAsync(
+        { ...payload, exp },
+        {
+          secret: this.configService.get<string>('customerRefreshToken.secret')
+        }
+      )
     }
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('customerRefreshToken.secret'),

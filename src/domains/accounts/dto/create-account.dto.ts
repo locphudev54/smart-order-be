@@ -22,19 +22,19 @@ export class CreateAccountDto {
   @MinLength(6, { message: 'password phải có ít nhất 6 kí tự' })
   @IsString({ message: 'password phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'password không được bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   password: string
 
   @MaxLength(40, { message: 'fullname không được vượt quá 40 kí tự' })
   @MinLength(1, { message: 'password phải có ít nhất 1 kí tự' })
   @IsString({ message: 'fullname phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'fullname không được bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   fullName: string
 
   @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
   @IsOptional() // Tác dụng khi gọi API
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   avatarUrl?: string // ? Tác dụng cho TS check
 
   // NOTE: VALIDATE ARRAY OF ENUM
@@ -56,6 +56,6 @@ export class CreateAccountDto {
 
   @IsString({ message: 'refreshToken phải là kiểu dữ liệu là string' })
   @IsOptional()
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   refreshToken?: string
 }

@@ -6,7 +6,7 @@ export class CreateCustomerDto {
   @MinLength(2, { message: 'name phải có ít nhất 2 kí tự' })
   @IsString({ message: 'name phải là kiểu dữ liệu là string' })
   @IsNotEmpty({ message: 'name không được  bỏ trống' })
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => String(value).trim())
   name: string
 
   @Min(1, { message: 'tableNumber phải > 0' })

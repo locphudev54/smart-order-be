@@ -2,8 +2,6 @@ import { ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { TokenExpiredError } from '@nestjs/jwt'
 import { AuthGuard } from '@nestjs/passport'
-import { IS_AUTHENTICATED_USER_ACCESS } from 'core/decorators/authenticated-user-access.decorator'
-import { IS_CUSTOMER_ROUTE } from 'core/decorators/customer-route.decorator'
 import { IS_PUBLIC_KEY } from 'core/decorators/public.decorator'
 import { UnauthorizedError } from 'core/exceptions/errors.exception'
 import { Request } from 'express'
@@ -21,17 +19,7 @@ export class JwtAuthenticatedAuthGuard extends AuthGuard(['jwt-customer', 'jwt-e
       context.getClass()
     ])
 
-    const isCustomerRoutes = this.reflector.getAllAndOverride<boolean>(IS_CUSTOMER_ROUTE, [
-      context.getHandler(),
-      context.getClass()
-    ])
-
-    const isAuthenticatedUserAccess = this.reflector.getAllAndOverride<boolean>(IS_AUTHENTICATED_USER_ACCESS, [
-      context.getHandler(),
-      context.getClass()
-    ])
-
-    if (isPublic || !isAuthenticatedUserAccess) {
+    if (isPublic) {
       return true
     }
 
@@ -50,7 +38,10 @@ export class JwtAuthenticatedAuthGuard extends AuthGuard(['jwt-customer', 'jwt-e
   }
 
   handleRequest(err, user, info) {
-    if (info instanceof TokenExpiredError) {
+    if (
+      info instanceof TokenExpiredError ||
+      (Array.isArray(info) && info.some((inforItem) => inforItem instanceof TokenExpiredError))
+    ) {
       throw new UnauthorizedError('Access Token hết hạn')
     }
 
