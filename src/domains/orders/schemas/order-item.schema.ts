@@ -13,7 +13,7 @@ export class OrderItem {
   @Prop({ required: true })
   price: number
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   note: string
 
   @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Processing })

@@ -11,6 +11,7 @@ import { OrderItem } from 'domains/orders/schemas/order-item.schema'
 import { OrderStatus, TableStatus } from 'core/constants/enum'
 import { TablesService } from 'domains/tables/tables.service'
 import { NotFoundError } from 'core/exceptions/errors.exception'
+import { generateOrderCode } from 'core/utils/utils'
 
 @Injectable()
 export class OrdersService {
@@ -24,7 +25,7 @@ export class OrdersService {
   async create(createOrderDto: CreateOrderDto) {
     const { customerId, items } = createOrderDto
     const customer = await this.customersService.findOne(customerId.toString())
-    const { table: tableId } = customer
+    const tableId = customer.table._id
 
     const orderItems: OrderItem[] = items.map((item) => {
       const { dishId, ...rest } = item
@@ -41,16 +42,18 @@ export class OrdersService {
     const previousOrder = await this.orderModel.findOne({ customer: customerId })
     if (!previousOrder) {
       // TH1: Lần đầu đặt món ăn -> Tạo mới Order như bình thường
+      const orderCode = generateOrderCode()
       return this.orderModel.create({
         customer: customer._id,
         items: orderItems,
         table: tableId,
-        totalPrice
+        totalPrice,
+        code: orderCode
       })
     } else {
       // TH2: Đã có đơn hàng trước đó -> Thêm mới các OrdeItem lúc sau vào mảng items
       totalPrice = totalPrice + previousOrder.totalPrice
-      return this.orderModel.updateOne(
+      return this.orderModel.findOneAndUpdate(
         {
           _id: previousOrder._id
         },
@@ -59,6 +62,9 @@ export class OrdersService {
             items: orderItems
           },
           totalPrice
+        },
+        {
+          returnOriginal: false
         }
       )
     }
@@ -82,10 +88,10 @@ export class OrdersService {
         .select(projection)
         .populate([
           { path: 'customer', select: ['_id', 'name'] },
-          { path: 'items.dish', select: ['-updatedAt', '-createdAt'] },
+          { path: 'items.dish' },
           {
             path: 'table',
-            select: ['_id', 'number', 'capacity', 'status']
+            select: ['-token', '-reservationLink']
           }
         ]),
       this.orderModel.find(filter)
@@ -105,10 +111,10 @@ export class OrdersService {
   async findOne(id: string) {
     const order = await this.orderModel.findOne({ _id: id }).populate([
       { path: 'customer', select: ['_id', 'name'] },
-      { path: 'items.dish', select: ['-updatedAt', '-createdAt'] },
+      { path: 'items.dish' },
       {
         path: 'table',
-        select: ['_id', 'number', 'capacity', 'status']
+        select: ['-token', '-reservationLink']
       }
     ])
     if (!order) {
@@ -117,9 +123,24 @@ export class OrdersService {
     return order
   }
 
+  async findOneByCustomerId(customerId: string) {
+    const order = await this.orderModel.findOne({ customer: customerId }).populate([
+      { path: 'customer', select: ['_id', 'name'] },
+      { path: 'items.dish' },
+      {
+        path: 'table',
+        select: ['-token', '-reservationLink']
+      }
+    ])
+    if (!order) {
+      return []
+    }
+    return order
+  }
+
   async update(id: string, updateOrderDto: UpdateOrderDto) {
     const { itemId } = updateOrderDto
-    const order = await this.orderModel.findOne({ _id: id })
+    const order = await this.findOne(id)
     if (!order) {
       throw new NotFoundError('Đơn hàng không tồn tại')
     }
@@ -131,18 +152,12 @@ export class OrdersService {
     }
     const updatedItem = { ...targetItem.toObject(), ...updateOrderDto, updatedAt: new Date() }
 
-    let { totalPrice } = order
-    const totalPriceTargetItem = targetItem.quantity * targetItem.price
-    const totalPriceUpdatedItem = updatedItem.quantity * updatedItem.price
-
-    if (totalPriceTargetItem !== totalPriceUpdatedItem) {
-      totalPrice = totalPrice - totalPriceTargetItem + totalPriceUpdatedItem
-    }
-
     // Cập nhật lại trạng thái của Table khi các OrderItem đã được hoàn thành
     const isOrderCompleted = order.items.every((item) => [OrderStatus.Paid, OrderStatus.Rejected].includes(item.status))
     if (isOrderCompleted) {
       await this.tablesService.update(order.table.toString(), { status: TableStatus.Available })
+    } else {
+      await this.tablesService.update(order.table.toString(), { status: order.table.status })
     }
 
     return this.orderModel.findOneAndUpdate(
@@ -153,8 +168,7 @@ export class OrdersService {
       {
         $set: {
           'items.$': updatedItem
-        },
-        totalPrice
+        }
       },
       {
         returnOriginal: false

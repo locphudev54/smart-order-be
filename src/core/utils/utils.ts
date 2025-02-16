@@ -1,4 +1,5 @@
 import { ValidationError } from 'class-validator'
+import { customAlphabet } from 'nanoid'
 
 export const extractErrorMessageFromDto = (errors: ValidationError[]): string[] => {
   const messages: string[] = []
@@ -24,4 +25,14 @@ export const createMediaUrl = ({
   filename: string
 }) => {
   return `${baseUrl}/public/${folderName}/${filename}`
+}
+
+export const generateOrderCode = () => {
+  const nanoid = customAlphabet('0123456789', 6)()
+  return `ORD${nanoid}`
+}
+
+export const generateCustomerCode = () => {
+  const nanoid = customAlphabet('0123456789', 6)()
+  return `CUS${nanoid}`
 }

@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config'
 import { VersioningType } from '@nestjs/common'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import path from 'path'
+import { customAlphabet } from 'nanoid'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)

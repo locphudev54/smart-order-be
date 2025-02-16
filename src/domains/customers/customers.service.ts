@@ -14,6 +14,7 @@ import { LogoutDto } from 'domains/customers/dto/logout.dto'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 import { OrdersService } from 'domains/orders/orders.service'
 import { BadRequestError, NotFoundError, UnauthorizedError } from 'core/exceptions/errors.exception'
+import { generateCustomerCode } from 'core/utils/utils'
 
 @Injectable()
 export class CustomersService {
@@ -36,8 +37,9 @@ export class CustomersService {
     if (table.status !== TableStatus.Available) {
       throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
+    const customerCode = generateCustomerCode()
     const [result] = await Promise.all([
-      this.customerModel.create({ name, table: table._id }),
+      this.customerModel.create({ name, table: table._id, code: customerCode }),
       this.tablesService.update(table._id.toString(), { status: TableStatus.Occupied })
     ])
 
@@ -51,12 +53,17 @@ export class CustomersService {
   }
 
   async findOrders(customer: CustomerType) {
-    const { _id } = customer
-    return this.ordersService.findAll({ customer: '67a193e6503ef5f6122dcfbe' })
+    return this.ordersService.findOneByCustomerId(customer._id)
   }
 
   async findOne(id: string) {
-    const customer = await this.customerModel.findOne({ _id: id })
+    const customer = await this.customerModel
+      .findOne({ _id: id })
+      .populate({
+        path: 'table',
+        select: ['_id', 'number', 'capacity', 'status']
+      })
+      .select(['-refreshToken'])
     if (!customer) {
       throw new NotFoundError('Khách hàng không tồn tại')
     }
@@ -87,8 +94,9 @@ export class CustomersService {
     if (table.status !== TableStatus.Available) {
       throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
+    const customerCode = generateCustomerCode()
     const [result] = await Promise.all([
-      this.customerModel.create({ name, table: table._id }),
+      this.customerModel.create({ name, table: table._id, code: customerCode }),
       this.tablesService.update(table._id.toString(), { status: TableStatus.Occupied })
     ])
 
@@ -101,6 +109,7 @@ export class CustomersService {
       this.signCustomerAccessToken(payload),
       this.signCustomerRefreshToken(payload)
     ])
+
     await this.customerModel.updateOne({ _id: customer._id }, { refreshToken })
     return {
       accessToken,

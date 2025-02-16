@@ -23,18 +23,26 @@ export class CustomersController {
   }
 
   // ------------------------------- CUSTOMER'S ROUTES -------------------------------
-  @UseGuards(JwtCustomerAuthGuard)
   @CustomerRoute()
+  @UseGuards(JwtCustomerAuthGuard)
   @Post('orders')
   createOrder(@Body() createOrderDto: CreateOrderByCustomerDto, @Customer() customer: CustomerType) {
     return this.customersService.createOrder(createOrderDto, customer)
   }
 
-  @UseGuards(JwtCustomerAuthGuard)
   @CustomerRoute()
+  @UseGuards(JwtCustomerAuthGuard)
   @Get('orders')
   getOrders(@Customer() customer: CustomerType) {
     return this.customersService.findOrders(customer)
+  }
+
+  @CustomerRoute()
+  @UseGuards(JwtCustomerAuthGuard)
+  @Get('me')
+  @ResponseMessage('Thông tin khách hàng')
+  me(@Customer() customer: CustomerType) {
+    return this.customersService.findOne(customer._id)
   }
 
   // ------------------------------- CUSTOMER'S AUTH ROUTES -------------------------------
