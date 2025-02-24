@@ -25,7 +25,7 @@ export class DishesService {
     const skip = (page - 1) * limit
     const { filter, sort, projection, population } = aqp(qs)
 
-    const [result, totalDocument] = await Promise.all([
+    const [result, totalDocuments] = await Promise.all([
       this.dishModel
         .find(filter)
         .skip(skip)
@@ -33,16 +33,17 @@ export class DishesService {
         .sort(sort as any)
         .select(projection)
         .populate(population),
-      this.dishModel.find(filter)
+      this.dishModel.countDocuments(filter)
     ])
-    const totalPages = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocuments / limit)
 
     return {
       data: result,
       meta: {
         page,
-        limit: result.length,
-        totalPages
+        limit,
+        totalPages,
+        totalDocuments
       }
     }
   }

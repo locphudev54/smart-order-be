@@ -49,7 +49,7 @@ export class CustomersService {
   createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType) {
     const { items } = createOrderDto
     const { _id: customerId } = customer
-    return this.ordersService.create({ customerId: new Types.ObjectId(customerId), items })
+    return this.ordersService.create({ customer: new Types.ObjectId(customerId), items })
   }
 
   async findOrders(customer: CustomerType) {

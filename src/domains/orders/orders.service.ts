@@ -23,17 +23,9 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    const { customerId, items } = createOrderDto
+    const { customer: customerId, items } = createOrderDto
     const customer = await this.customersService.findOne(customerId.toString())
     const tableId = customer.table._id
-
-    const orderItems: OrderItem[] = items.map((item) => {
-      const { dishId, ...rest } = item
-      return {
-        dish: dishId,
-        ...rest
-      }
-    })
 
     let totalPrice = items.reduce((result, orderItem) => {
       return result + orderItem.price * orderItem.quantity
@@ -44,8 +36,8 @@ export class OrdersService {
       // TH1: Lần đầu đặt món ăn -> Tạo mới Order như bình thường
       const orderCode = generateOrderCode()
       return this.orderModel.create({
-        customer: customer._id,
-        items: orderItems,
+        customer: customerId,
+        items,
         table: tableId,
         totalPrice,
         code: orderCode
@@ -59,7 +51,7 @@ export class OrdersService {
         },
         {
           $push: {
-            items: orderItems
+            items
           },
           totalPrice
         },
@@ -72,14 +64,15 @@ export class OrdersService {
 
   async findAll(qs: QueryType) {
     const page = Number(qs.page) || 1
-    const limit = Number(qs.limit) || 10
+    // Ko truyền limit thì sẽ fetch tất cả ordẻ
+    const limit = Number(qs.limit) || Number.MAX_VALUE
     delete qs.page
     delete qs.limit
 
     const skip = (page - 1) * limit
     const { filter, sort, projection } = aqp(qs)
 
-    const [result, totalDocument] = await Promise.all([
+    const [result, totalDocuments] = await Promise.all([
       this.orderModel
         .find(filter)
         .skip(skip)
@@ -94,16 +87,17 @@ export class OrdersService {
             select: ['-token', '-reservationLink']
           }
         ]),
-      this.orderModel.find(filter)
+      this.orderModel.countDocuments(filter)
     ])
-    const totalPages = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocuments / limit)
 
     return {
       data: result,
       meta: {
         page,
-        limit: result.length,
-        totalPages
+        limit,
+        totalPages,
+        totalDocuments
       }
     }
   }
@@ -133,43 +127,22 @@ export class OrdersService {
       }
     ])
     if (!order) {
-      return []
+      throw new NotFoundError('Đơn hàng không tồn tại')
     }
     return order
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
-    const { itemId } = updateOrderDto
     const order = await this.findOne(id)
     if (!order) {
       throw new NotFoundError('Đơn hàng không tồn tại')
     }
 
-    // Tạo ra OrderItem mới & Tính toán lại `totalPrice` dựa trên OrdetItem cũ và DTO
-    const targetItem = order.items.find((item) => item.id === itemId)
-    if (!targetItem) {
-      throw new NotFoundError('OrderItem với itemId gửi lên không tồn tại')
-    }
-    const updatedItem = { ...targetItem.toObject(), ...updateOrderDto, updatedAt: new Date() }
-
-    // Cập nhật lại trạng thái của Table khi các OrderItem đã được hoàn thành
-    const isOrderCompleted = order.items.every((item) => [OrderStatus.Paid, OrderStatus.Rejected].includes(item.status))
-    if (isOrderCompleted) {
-      await this.tablesService.update(order.table.toString(), { status: TableStatus.Available })
-    } else {
-      await this.tablesService.update(order.table.toString(), { status: order.table.status })
-    }
-
     return this.orderModel.findOneAndUpdate(
       {
-        _id: id,
-        'items._id': itemId
+        _id: id
       },
-      {
-        $set: {
-          'items.$': updatedItem
-        }
-      },
+      updateOrderDto,
       {
         returnOriginal: false
       }

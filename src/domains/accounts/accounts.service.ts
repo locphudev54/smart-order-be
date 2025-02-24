@@ -45,7 +45,7 @@ export class AccountsService {
     const skip = (page - 1) * limit
     const { filter, sort, population } = aqp(qs)
 
-    const [result, totalDocument] = await Promise.all([
+    const [result, totalDocuments] = await Promise.all([
       this.accountModel
         .find(filter)
         .skip(skip)
@@ -53,16 +53,17 @@ export class AccountsService {
         .sort(sort as any)
         .select(['-password', '-refreshToken'])
         .populate(population),
-      this.accountModel.find(filter)
+      this.accountModel.countDocuments(filter)
     ])
-    const totalPages = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocuments / limit)
 
     return {
       data: result,
       meta: {
         page,
-        limit: result.length,
-        totalPages
+        limit,
+        totalPages,
+        totalDocuments
       }
     }
   }

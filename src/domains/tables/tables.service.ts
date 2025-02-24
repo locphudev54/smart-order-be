@@ -40,7 +40,7 @@ export class TablesService {
     const skip = (page - 1) * limit
     const { filter, sort, projection, population } = aqp(qs)
 
-    const [result, totalDocument] = await Promise.all([
+    const [result, totalDocuments] = await Promise.all([
       this.tableModel
         .find(filter)
         .skip(skip)
@@ -48,16 +48,17 @@ export class TablesService {
         .sort(sort as any)
         .select(projection)
         .populate(population),
-      this.tableModel.find(filter)
+      this.tableModel.countDocuments(filter)
     ])
-    const totalPages = Math.ceil(totalDocument.length / result.length)
+    const totalPages = Math.ceil(totalDocuments / limit)
 
     return {
       data: result,
       meta: {
         page,
-        limit: result.length,
-        totalPages
+        limit,
+        totalPages,
+        totalDocuments
       }
     }
   }

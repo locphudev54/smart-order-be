@@ -16,9 +16,6 @@ export class OrderItem {
   @Prop({ default: '' })
   note: string
 
-  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Processing })
-  status?: OrderStatus
-
   @Prop({ type: Date, default: Date.now })
   createdAt?: string
 
