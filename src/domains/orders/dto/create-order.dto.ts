@@ -18,7 +18,7 @@ export class CreateOrderDto {
   items: OrderItemDto[]
 
   @IsEnum(OrderStatus, {
-    message: `status phải là một trong những giá trị sau: ${OrderStatus.Canceled} || ${OrderStatus.Cooked} || ${OrderStatus.Paid} || ${OrderStatus.Processing} || ${OrderStatus.Rejected} || ${OrderStatus.Served}`
+    message: `status phải là một trong những giá trị sau: ${Object.values(OrderStatus).join(' || ')}`
   })
   @IsOptional()
   status?: OrderStatus

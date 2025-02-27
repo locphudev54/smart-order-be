@@ -60,6 +60,7 @@ import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
       useValue: new ValidationPipe({
         whitelist: true,
         transform: true,
+        transformOptions: { enableImplicitConversion: true },
         stopAtFirstError: true,
         exceptionFactory: (validationErrors: ValidationError[] = []) => {
           const errorMessage = extractErrorMessageFromDto(validationErrors)

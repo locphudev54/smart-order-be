@@ -19,7 +19,7 @@ export class Order {
   @Prop({ required: true })
   totalPrice: number
 
-  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Processing })
+  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Pending })
   status?: OrderStatus
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Table' })

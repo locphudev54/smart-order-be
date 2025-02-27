@@ -4,11 +4,8 @@ import { UpdateOrderDto } from './dto/update-order.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
 import { Model } from 'mongoose'
-import aqp from 'api-query-params'
 import { CustomersService } from 'domains/customers/customers.service'
-import { QueryType } from 'core/types/type'
 import { OrderItem } from 'domains/orders/schemas/order-item.schema'
-import { OrderStatus, TableStatus } from 'core/constants/enum'
 import { TablesService } from 'domains/tables/tables.service'
 import { NotFoundError } from 'core/exceptions/errors.exception'
 import { generateOrderCode } from 'core/utils/utils'
@@ -62,41 +59,34 @@ export class OrdersService {
     }
   }
 
-  async findAll(qs: QueryType) {
-    const page = Number(qs.page) || 1
-    // Ko truyền limit thì sẽ fetch tất cả ordẻ
-    const limit = Number(qs.limit) || Number.MAX_VALUE
-    delete qs.page
-    delete qs.limit
+  async findAll(page?: number, limit?: number, from?: Date, to?: Date) {
+    const filter: any = {}
+    if (from || to) {
+      filter.createdAt = {}
+      if (from) filter.createdAt.$gte = from
+      if (to) filter.createdAt.$lt = to
+    }
 
-    const skip = (page - 1) * limit
-    const { filter, sort, projection } = aqp(qs)
+    const query = this.orderModel
+      .find(filter)
+      .populate([
+        { path: 'customer', select: ['_id', 'name'] },
+        { path: 'items.dish' },
+        { path: 'table', select: ['-token', '-reservationLink'] }
+      ])
 
-    const [result, totalDocuments] = await Promise.all([
-      this.orderModel
-        .find(filter)
-        .skip(skip)
-        .limit(limit)
-        .sort(sort as any)
-        .select(projection)
-        .populate([
-          { path: 'customer', select: ['_id', 'name'] },
-          { path: 'items.dish' },
-          {
-            path: 'table',
-            select: ['-token', '-reservationLink']
-          }
-        ]),
-      this.orderModel.countDocuments(filter)
-    ])
-    const totalPages = Math.ceil(totalDocuments / limit)
+    if (limit && page) {
+      query.limit(limit).skip((page - 1) * limit)
+    }
+
+    const [data, totalDocuments] = await Promise.all([query, this.orderModel.countDocuments(filter)])
 
     return {
-      data: result,
+      data,
       meta: {
-        page,
-        limit,
-        totalPages,
+        page: page || 1,
+        limit: limit || totalDocuments,
+        totalPages: limit ? Math.ceil(totalDocuments / limit) : 1,
         totalDocuments
       }
     }

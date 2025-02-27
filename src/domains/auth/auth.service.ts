@@ -188,7 +188,7 @@ export class AuthService {
     }
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('employeeRefreshToken.secret'),
-      expiresIn: ms(this.configService.get<StringValue>('employeeRefreshToken.expiresIn')) / 1000 // chia 1000 để đổi từ milisecond -> second
+      expiresIn: ms(this.configService.get<StringValue>('employeeRefreshToken.expiresIn')) / 1000
     })
   }
 }

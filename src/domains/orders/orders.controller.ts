@@ -2,8 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common
 import { OrdersService } from './orders.service'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
-import { QueryType } from 'core/types/type'
 import { ValidateMongoIdPipe } from 'core/pipes/validate-mongo-id.pipe'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 
 @Controller('orders')
 export class OrdersController {
@@ -15,12 +16,12 @@ export class OrdersController {
   }
 
   @Get()
-  findAll(@Query() qs: QueryType) {
-    return this.ordersService.findAll(qs)
+  findAll(@Query() { page, limit }: PaginationQueryDto, @Query() { from, to }: DateRangeQueryDto) {
+    return this.ordersService.findAll(page, limit, from, to)
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.ordersService.findOne(id)
   }
 
