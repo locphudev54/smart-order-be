@@ -3,7 +3,7 @@ import { OrderStatus } from 'core/constants/enum'
 import { CustomerDocument } from 'domains/customers/schemas/customer.schema'
 import { OrderItem, OrderItemSchema } from 'domains/orders/schemas/order-item.schema'
 import { TableDocument } from 'domains/tables/schemas/table.schema'
-import mongoose, { Types } from 'mongoose'
+import mongoose from 'mongoose'
 
 @Schema({ timestamps: true, versionKey: false, collection: 'Orders' })
 export class Order {

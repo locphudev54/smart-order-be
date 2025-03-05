@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { CreateDishDto } from './dto/create-dish.dto'
-import { UpdateDishDto } from './dto/update-dish.dto'
 import { InjectModel } from '@nestjs/mongoose'
+import { NotFoundError } from 'core/exceptions/errors.exception'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { DishQueryDto } from 'domains/dishes/dto/dish-query.dto'
 import { Dish, DishDocument } from 'domains/dishes/schemas/dish.schema'
 import { Model } from 'mongoose'
-import { QueryType } from 'core/types/type'
-import aqp from 'api-query-params'
-import { NotFoundError } from 'core/exceptions/errors.exception'
+import { CreateDishDto } from './dto/create-dish.dto'
+import { UpdateDishDto } from './dto/update-dish.dto'
 
 @Injectable()
 export class DishesService {
@@ -16,33 +16,28 @@ export class DishesService {
     return this.dishModel.create(createDishDto)
   }
 
-  async findAll(qs: QueryType) {
-    const page = Number(qs.page) || 1
-    const limit = Number(qs.limit) || 10
-    delete qs.page
-    delete qs.limit
+  async findAll(qs: PaginationQueryDto & DishQueryDto) {
+    const { page, limit, sort: sortQuery, ...filter } = qs
+    const sortField = sortQuery?.split('.')?.[0]
+    const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
 
-    const skip = (page - 1) * limit
-    const { filter, sort, projection, population } = aqp(qs)
+    const query = this.dishModel.find(filter)
 
-    const [result, totalDocuments] = await Promise.all([
-      this.dishModel
-        .find(filter)
-        .skip(skip)
+    if (limit && page) {
+      query
+        .skip((page - 1) * limit)
         .limit(limit)
-        .sort(sort as any)
-        .select(projection)
-        .populate(population),
-      this.dishModel.countDocuments(filter)
-    ])
-    const totalPages = Math.ceil(totalDocuments / limit)
+        .sort(sort)
+    }
+
+    const [data, totalDocuments] = await Promise.all([query, this.dishModel.countDocuments(filter)])
 
     return {
-      data: result,
+      data,
       meta: {
-        page,
-        limit,
-        totalPages,
+        page: page || 1,
+        limit: limit || totalDocuments,
+        totalPages: limit ? Math.ceil(totalDocuments / limit) : 1,
         totalDocuments
       }
     }

@@ -1,13 +1,13 @@
-import { Type } from 'class-transformer'
-import { ArrayMinSize, IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator'
+import { Transform, Type } from 'class-transformer'
+import { ArrayMinSize, IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator'
 import { OrderStatus } from 'core/constants/enum'
 import { OrderItemDto } from 'domains/orders/dto/order-item.dto'
-import { Types } from 'mongoose'
 
 export class CreateOrderDto {
-  @IsMongoId({ message: 'customer phải là định dạng ObjectId' })
-  @IsNotEmpty({ message: 'customer không được bỏ trống' })
-  customer: Types.ObjectId
+  @IsInt({ message: 'tableNumber phải là định dạng số nguyên' })
+  @IsNotEmpty({ message: 'tableNumber không được bỏ trống' })
+  @Type(() => Number)
+  tableNumber: number
 
   // NOTE: VALIDATE ARRAY OF NESTED OBJECT
   @Type(() => OrderItemDto)
@@ -16,10 +16,4 @@ export class CreateOrderDto {
   @IsArray({ message: 'items phải là định dạng mảng' })
   @IsNotEmpty({ message: 'items không được bỏ trống' })
   items: OrderItemDto[]
-
-  @IsEnum(OrderStatus, {
-    message: `status phải là một trong những giá trị sau: ${Object.values(OrderStatus).join(' || ')}`
-  })
-  @IsOptional()
-  status?: OrderStatus
 }

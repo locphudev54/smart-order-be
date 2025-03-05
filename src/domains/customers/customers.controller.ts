@@ -7,25 +7,20 @@ import { CustomerType } from 'core/types/type'
 import { LocalCustomerAuthGuard } from 'core/guards/local-customer-auth.guard'
 import { RefreshTokenDto } from 'domains/customers/dto/refresh-token.dto'
 import { LogoutDto } from 'domains/customers/dto/logout.dto'
-import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 import { Customer } from 'core/decorators/customer.decorator'
 import { CustomerRoute } from 'core/decorators/customer-route.decorator'
 import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
-
+import { CreateOrderDto } from 'domains/orders/dto/create-order.dto'
+import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
-
-  // ------------------------------- EMPLOYEE'S ROUTES -----------------------------
-  @Post()
-  create(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.customersService.create(createCustomerDto)
-  }
 
   // ------------------------------- CUSTOMER'S ROUTES -------------------------------
   @CustomerRoute()
   @UseGuards(JwtCustomerAuthGuard)
   @Post('orders')
+  @ResponseMessage('Tạo đơn hàng thành công')
   createOrder(@Body() createOrderDto: CreateOrderByCustomerDto, @Customer() customer: CustomerType) {
     return this.customersService.createOrder(createOrderDto, customer)
   }
@@ -33,6 +28,7 @@ export class CustomersController {
   @CustomerRoute()
   @UseGuards(JwtCustomerAuthGuard)
   @Get('orders')
+  @ResponseMessage('Lấy danh sách đơn hàng thành công')
   getOrders(@Customer() customer: CustomerType) {
     return this.customersService.findOrders(customer)
   }
@@ -40,7 +36,7 @@ export class CustomersController {
   @CustomerRoute()
   @UseGuards(JwtCustomerAuthGuard)
   @Get('me')
-  @ResponseMessage('Thông tin khách hàng')
+  @ResponseMessage('Lấy thông tin khách hàng thành công')
   me(@Customer() customer: CustomerType) {
     return this.customersService.findOne(customer._id)
   }
@@ -49,21 +45,21 @@ export class CustomersController {
   @Public()
   @UseGuards(LocalCustomerAuthGuard)
   @Post('auth/login')
-  @ResponseMessage('Login thành công')
+  @ResponseMessage('Đăng nhập thành công')
   login(@Request() req) {
     return this.customersService.login(req.user as CustomerType)
   }
 
   @Public()
   @Post('auth/refresh-token')
-  @ResponseMessage('Refresh Token thành công')
+  @ResponseMessage('Cập nhật Refresh Token thành công')
   refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.customersService.refreshToken(refreshTokenDto)
   }
 
   @CustomerRoute()
   @Post('auth/logout')
-  @ResponseMessage('Logout thành công')
+  @ResponseMessage('Đăng xuất thành công')
   logout(@Body() logoutDto: LogoutDto) {
     return this.customersService.logout(logoutDto)
   }

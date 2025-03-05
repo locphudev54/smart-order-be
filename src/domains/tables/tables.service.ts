@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
-import { QueryType } from 'core/types/type'
-import aqp from 'api-query-params'
+import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { CreateTableDto } from 'domains/tables/dto/create-table.dto'
+import { TableQueryDto } from 'domains/tables/dto/table-query.dto'
 import { UpdateTableDto } from 'domains/tables/dto/update-table.dto'
 import { Table, TableDocument } from 'domains/tables/schemas/table.schema'
-import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
-import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
+import { Model } from 'mongoose'
 
 @Injectable()
 export class TablesService {
@@ -20,7 +20,7 @@ export class TablesService {
 
   async create(createTableDto: CreateTableDto) {
     const { number } = createTableDto
-    const tableWithNumber = await this.findTableByNumber(number)
+    const tableWithNumber = await this.findByTableNumber(number)
     if (tableWithNumber) {
       throw new BadRequestError(`Bàn ăn với số hiệu ${number} đã tồn tại`)
     }
@@ -31,33 +31,38 @@ export class TablesService {
     return this.tableModel.create({ ...createTableDto, token, reservationLink })
   }
 
-  async findAll(qs: QueryType) {
-    const page = Number(qs.page) || 1
-    const limit = Number(qs.limit) || 10
-    delete qs.page
-    delete qs.limit
+  async findAll(qs: PaginationQueryDto & TableQueryDto) {
+    const { page, limit, sort: sortQuery, ...filter } = qs
+    const sortField = sortQuery?.split('.')?.[0]
+    const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
 
-    const skip = (page - 1) * limit
-    const { filter, sort, projection, population } = aqp(qs)
+    // --------------------- Filter key of nested object ---------------------
+    // const { customerCode } = orderFilter
+    // delete orderFilter.customerCode
+    // const customerId = (await this.customersService.findByCode(customerCode))?._id
 
-    const [result, totalDocuments] = await Promise.all([
-      this.tableModel
-        .find(filter)
-        .skip(skip)
+    // const filter: any = orderFilter
+    // if (customerCode) {
+    //   filter.customer = customerId
+    // }
+
+    const query = this.tableModel.find(filter)
+
+    if (limit && page) {
+      query
+        .skip((page - 1) * limit)
         .limit(limit)
-        .sort(sort as any)
-        .select(projection)
-        .populate(population),
-      this.tableModel.countDocuments(filter)
-    ])
-    const totalPages = Math.ceil(totalDocuments / limit)
+        .sort(sort)
+    }
+
+    const [data, totalDocuments] = await Promise.all([query, this.tableModel.countDocuments(filter)])
 
     return {
-      data: result,
+      data,
       meta: {
-        page,
-        limit,
-        totalPages,
+        page: page || 1,
+        limit: limit || totalDocuments,
+        totalPages: limit ? Math.ceil(totalDocuments / limit) : 1,
         totalDocuments
       }
     }
@@ -71,7 +76,7 @@ export class TablesService {
     return table
   }
 
-  findTableByNumber(number: number) {
+  findByTableNumber(number: number) {
     return this.tableModel.findOne({ number })
   }
 
@@ -87,7 +92,7 @@ export class TablesService {
       throw new NotFoundError('Bàn không tồn tại')
     }
 
-    const tableWithNumber = await this.findTableByNumber(number)
+    const tableWithNumber = await this.findByTableNumber(number)
     if (tableWithNumber) {
       throw new BadRequestException(`Bàn ăn với số hiệu ${number} đã tồn tại`)
     }

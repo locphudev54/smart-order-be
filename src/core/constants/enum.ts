@@ -13,8 +13,7 @@ export enum DishStatus {
 export enum TableStatus {
   Available = 'Available',
   Reserved = 'Reserved',
-  Occupied = 'Occupied',
-  Hidden = 'Hidden'
+  Occupied = 'Occupied'
 }
 
 export enum OrderStatus {

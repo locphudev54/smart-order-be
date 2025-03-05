@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { CreateAccountDto } from './dto/create-account.dto'
-import { UpdateAccountDto } from './dto/update-account.dto'
 import { InjectModel } from '@nestjs/mongoose'
-import { Account, AccountDocument } from 'domains/accounts/schemas/account.schema'
-import mongoose, { Model } from 'mongoose'
 import * as bcrypt from 'bcrypt'
 import { NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.exception'
-import { QueryType } from 'core/types/type'
-import aqp from 'api-query-params'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { AccountQueryDto } from 'domains/accounts/dto/account-query.dto'
+import { Account, AccountDocument } from 'domains/accounts/schemas/account.schema'
+import mongoose, { Model } from 'mongoose'
+import { CreateAccountDto } from './dto/create-account.dto'
+import { UpdateAccountDto } from './dto/update-account.dto'
 
 @Injectable()
 export class AccountsService {
@@ -36,33 +36,28 @@ export class AccountsService {
     }
   }
 
-  async findAll(qs: QueryType) {
-    const page = Number(qs.page) || 1
-    const limit = Number(qs.limit) || 10
-    delete qs.page
-    delete qs.limit
+  async findAll(qs: PaginationQueryDto & AccountQueryDto) {
+    const { page, limit, sort: sortQuery, ...filter } = qs
+    const sortField = sortQuery?.split('.')?.[0]
+    const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
 
-    const skip = (page - 1) * limit
-    const { filter, sort, population } = aqp(qs)
+    const query = this.accountModel.find(filter)
 
-    const [result, totalDocuments] = await Promise.all([
-      this.accountModel
-        .find(filter)
-        .skip(skip)
+    if (limit && page) {
+      query
+        .skip((page - 1) * limit)
         .limit(limit)
-        .sort(sort as any)
-        .select(['-password', '-refreshToken'])
-        .populate(population),
-      this.accountModel.countDocuments(filter)
-    ])
-    const totalPages = Math.ceil(totalDocuments / limit)
+        .sort(sort)
+    }
+
+    const [data, totalDocuments] = await Promise.all([query, this.accountModel.countDocuments(filter)])
 
     return {
-      data: result,
+      data,
       meta: {
-        page,
-        limit,
-        totalPages,
+        page: page || 1,
+        limit: limit || totalDocuments,
+        totalPages: limit ? Math.ceil(totalDocuments / limit) : 1,
         totalDocuments
       }
     }

@@ -1,14 +1,17 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { OrderStatus, TableStatus } from 'core/constants/enum'
+import { NotFoundError } from 'core/exceptions/errors.exception'
+import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { generateOrderCode } from 'core/utils/utils'
+import { CustomersService } from 'domains/customers/customers.service'
+import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
+import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
+import { TablesService } from 'domains/tables/tables.service'
+import { Model, Types } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
-import { InjectModel } from '@nestjs/mongoose'
-import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
-import { Model } from 'mongoose'
-import { CustomersService } from 'domains/customers/customers.service'
-import { OrderItem } from 'domains/orders/schemas/order-item.schema'
-import { TablesService } from 'domains/tables/tables.service'
-import { NotFoundError } from 'core/exceptions/errors.exception'
-import { generateOrderCode } from 'core/utils/utils'
 
 @Injectable()
 export class OrdersService {
@@ -20,9 +23,22 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    const { customer: customerId, items } = createOrderDto
-    const customer = await this.customersService.findOne(customerId.toString())
-    const tableId = customer.table._id
+    const { tableNumber, items } = createOrderDto
+    const table = await this.tablesService.findByTableNumber(tableNumber)
+    if (!table) {
+      throw new NotFoundError('Bàn không tồn tại')
+    }
+
+    let customerId: Types.ObjectId | undefined = undefined
+    // Kiểm tra xem đơn hàng mới cho bàn này là của khách hàng đang sử dụng hay là của khách hàng mới
+    if (table.customer) {
+      // Khách hàng đã đặt hoặc đang ngồi ở bàn
+      customerId = table.customer
+    } else {
+      // Khách hàng chưa đặt bàn
+      const newCustomer = await this.customersService.create({ table })
+      customerId = newCustomer._id
+    }
 
     let totalPrice = items.reduce((result, orderItem) => {
       return result + orderItem.price * orderItem.quantity
@@ -35,7 +51,7 @@ export class OrdersService {
       return this.orderModel.create({
         customer: customerId,
         items,
-        table: tableId,
+        table: table._id,
         totalPrice,
         code: orderCode
       })
@@ -59,8 +75,22 @@ export class OrdersService {
     }
   }
 
-  async findAll(page?: number, limit?: number, from?: Date, to?: Date) {
-    const filter: any = {}
+  async findAll(qs: PaginationQueryDto & DateRangeQueryDto & OrderQueryDto) {
+    const { page, limit, from, to, sort: sortQuery, ...orderFilter } = qs
+    // sort: createdAt.asc || createdAt.desc
+    const sortField = sortQuery?.split('.')?.[0]
+    const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
+
+    // Filter key of nested object
+    const { customerCode } = orderFilter
+    delete orderFilter.customerCode
+    const customerId = (await this.customersService.findByCode(customerCode))?._id
+
+    const filter: any = orderFilter
+    if (customerCode) {
+      filter.customer = customerId
+    }
+
     if (from || to) {
       filter.createdAt = {}
       if (from) filter.createdAt.$gte = from
@@ -70,13 +100,16 @@ export class OrdersService {
     const query = this.orderModel
       .find(filter)
       .populate([
-        { path: 'customer', select: ['_id', 'name'] },
+        { path: 'customer', select: ['_id', 'code'] },
         { path: 'items.dish' },
         { path: 'table', select: ['-token', '-reservationLink'] }
       ])
 
     if (limit && page) {
-      query.limit(limit).skip((page - 1) * limit)
+      query
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort(sort)
     }
 
     const [data, totalDocuments] = await Promise.all([query, this.orderModel.countDocuments(filter)])
@@ -126,6 +159,12 @@ export class OrdersService {
     const order = await this.findOne(id)
     if (!order) {
       throw new NotFoundError('Đơn hàng không tồn tại')
+    }
+
+    if ([OrderStatus.Paid, OrderStatus.Canceled].includes(updateOrderDto.status)) {
+      await this.tablesService.update(order.table.id, { status: TableStatus.Available, customer: null })
+    } else {
+      await this.tablesService.update(order.table.id, { status: TableStatus.Occupied, customer: order.customer._id })
     }
 
     return this.orderModel.findOneAndUpdate(

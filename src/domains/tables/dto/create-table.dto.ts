@@ -16,7 +16,7 @@ export class CreateTableDto {
   capacity: number
 
   @IsEnum(TableStatus, {
-    message: `status phải là một trong những giá trị sau: ${TableStatus.Available} || ${TableStatus.Hidden} || ${TableStatus.Occupied} || ${TableStatus.Reserved}`
+    message: `status phải là một trong những giá trị sau: ${Object.values(TableStatus).join(' || ')}`
   })
   @IsOptional()
   status?: TableStatus

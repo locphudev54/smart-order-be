@@ -29,14 +29,13 @@ export type TableTokenPayload = {
 
 export type CustomerType = {
   _id: string
-  name: string
-  table: string
+  table: number
 }
 
 export type CustomerTokenPayload = {
   _id: string
   name: string
-  table: string
+  table: number
   iat: number
   exp: number
 }

@@ -18,6 +18,6 @@ export class LocalCustomerStrategy extends PassportStrategy(Strategy, 'local-cus
     const customer = await this.customersService.validateCustomer(name, tableToken)
     const decodedTableToken = this.jwtService.decode<TableTokenPayload>(tableToken)
     // Gán vào req.user
-    return { _id: customer._id.toString(), name: customer.name, table: decodedTableToken.tableNumber.toString() }
+    return { _id: customer._id.toString(), table: decodedTableToken.tableNumber }
   }
 }

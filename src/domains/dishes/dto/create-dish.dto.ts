@@ -22,7 +22,7 @@ export class CreateDishDto {
   price: number
 
   @IsEnum(DishStatus, {
-    message: `status phải là một trong những giá trị sau: ${DishStatus.Available} || ${DishStatus.Unavailable} || ${DishStatus.Hidden}`
+    message: `status phải là một trong những giá trị sau: ${Object.values(DishStatus).join(' || ')}`
   })
   @IsOptional()
   status?: DishStatus

@@ -6,9 +6,6 @@ export type CustomerDocument = HydratedDocument<Customer>
 
 @Schema({ timestamps: true, versionKey: false, collection: 'Customers' })
 export class Customer {
-  @Prop({ required: true })
-  name: string
-
   @Prop({ required: true, unique: true })
   code: string
 

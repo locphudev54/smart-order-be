@@ -1,14 +1,7 @@
 import { Transform } from 'class-transformer'
-import { IsInt, IsNotEmpty, IsString, MaxLength, Min, MinLength } from 'class-validator'
+import { IsInt, IsNotEmpty, Min } from 'class-validator'
 
 export class CreateCustomerDto {
-  @MaxLength(40, { message: 'name không được vượt quá 40 kí tự' })
-  @MinLength(2, { message: 'name phải có ít nhất 2 kí tự' })
-  @IsString({ message: 'name phải là kiểu dữ liệu là string' })
-  @IsNotEmpty({ message: 'name không được  bỏ trống' })
-  @Transform(({ value }) => String(value).trim())
-  name: string
-
   @Min(1, { message: 'tableNumber phải > 0' })
   @IsInt({ message: 'tableNumber phải là định dạng số nguyên' })
   @IsNotEmpty({ message: 'tableNumber không được bỏ trống' })
