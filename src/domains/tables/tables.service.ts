@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
+import { TableStatus } from 'core/constants/enum'
 import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { CreateTableDto } from 'domains/tables/dto/create-table.dto'
@@ -26,7 +27,7 @@ export class TablesService {
     }
 
     const token = await this.signTableToken(number)
-    const reservationLink = this.createReservationLink({ tableNumber: number, tableToken: token })
+    const reservationLink = this.createReservationLink(token)
 
     return this.tableModel.create({ ...createTableDto, token, reservationLink })
   }
@@ -76,6 +77,14 @@ export class TablesService {
     return table
   }
 
+  findByTableNumberList(numberList: number[]) {
+    return this.tableModel.find({
+      number: {
+        $in: numberList
+      }
+    })
+  }
+
   findByTableNumber(number: number) {
     return this.tableModel.findOne({ number })
   }
@@ -85,7 +94,7 @@ export class TablesService {
   }
 
   async update(id: string, updateTableDto: UpdateTableDto) {
-    const { changeToken, number } = updateTableDto
+    const { changeToken, number, status } = updateTableDto
 
     const tableUpdate = await this.tableModel.findById(id)
     if (!tableUpdate) {
@@ -98,13 +107,13 @@ export class TablesService {
     }
 
     if (!changeToken) {
+      if (status === TableStatus.Available) {
+        updateTableDto.customer = null
+      }
       return this.tableModel.findOneAndUpdate({ _id: id }, updateTableDto, { returnOriginal: false })
     } else {
       const newTableToken = await this.signTableToken(number)
-      const reservationLink = this.createReservationLink({
-        tableNumber: number || tableUpdate.number,
-        tableToken: newTableToken
-      })
+      const reservationLink = this.createReservationLink(newTableToken)
       return this.tableModel.findOneAndUpdate(
         { _id: id },
         { ...updateTableDto, reservationLink, token: newTableToken },
@@ -125,7 +134,7 @@ export class TablesService {
     return this.jwtService.signAsync({ tableNumber }, { secret: this.configService.get('tableToken.secret') })
   }
 
-  createReservationLink({ tableToken, tableNumber }: { tableToken: string; tableNumber: number }) {
-    return `${this.configService.get<string>('client.baseUrl')}/tables/${tableNumber}?token=${tableToken}`
+  createReservationLink(tableToken: string) {
+    return `${this.configService.get<string>('client.baseUrl')}/tables?token=${tableToken}`
   }
 }

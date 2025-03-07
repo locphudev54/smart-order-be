@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { OrderStatus, TableStatus } from 'core/constants/enum'
-import { NotFoundError } from 'core/exceptions/errors.exception'
+import { BadRequestError, NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.exception'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { generateOrderCode } from 'core/utils/utils'
@@ -9,9 +9,10 @@ import { CustomersService } from 'domains/customers/customers.service'
 import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
 import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
 import { TablesService } from 'domains/tables/tables.service'
-import { Model, Types } from 'mongoose'
+import { FilterQuery, Model, Types } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
+import { isAfter, isValid } from 'date-fns'
 
 @Injectable()
 export class OrdersService {
@@ -57,6 +58,7 @@ export class OrdersService {
       })
     } else {
       // TH2: Đã có đơn hàng trước đó -> Thêm mới các OrdeItem lúc sau vào mảng items
+      // Đồng nghĩa với việc đơn hàng sẽ có trạng thái là Pending
       totalPrice = totalPrice + previousOrder.totalPrice
       return this.orderModel.findOneAndUpdate(
         {
@@ -66,7 +68,8 @@ export class OrdersService {
           $push: {
             items
           },
-          totalPrice
+          totalPrice,
+          status: OrderStatus.Pending
         },
         {
           returnOriginal: false
@@ -76,19 +79,39 @@ export class OrdersService {
   }
 
   async findAll(qs: PaginationQueryDto & DateRangeQueryDto & OrderQueryDto) {
-    const { page, limit, from, to, sort: sortQuery, ...orderFilter } = qs
-    // sort: createdAt.asc || createdAt.desc
-    const sortField = sortQuery?.split('.')?.[0]
-    const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
+    const { page, limit, from, to, sort: sortQuery, customerCode, status, code, tableNumber } = qs
+    // sort và status là những query có gtri đặc biệt -> phải transform thành cú pháp hợp lệ trước khi mà thực hiện filter
+    // customerCode và tableNumber là query đặc biệt -> dùng để query nested Object
+    // Cho nên ta phải tasck 3 query value đó ra riêng
 
     // Filter key of nested object
-    const { customerCode } = orderFilter
-    delete orderFilter.customerCode
     const customerId = (await this.customersService.findByCode(customerCode))?._id
+    const tableIds = (await this.tablesService.findByTableNumberList(tableNumber)).map((table) => table._id)
 
-    const filter: any = orderFilter
+    const filter: FilterQuery<OrderDocument> = {}
+
     if (customerCode) {
       filter.customer = customerId
+    }
+
+    if (status) {
+      filter.status = { $in: status }
+    }
+
+    if (code) {
+      filter.code = { $regex: code, $options: 'i' }
+    }
+
+    if (tableNumber) {
+      filter.table = { $in: tableIds }
+    }
+
+    // sort: createdAt.desc || createdAt.asc
+    let sort = '-createdAt'
+    if (sortQuery) {
+      const sortField = sortQuery.split('.')[0]
+      const isDescending = sortQuery.split('.')[1] === 'desc'
+      sort = isDescending ? `-${sortField}` : sortField
     }
 
     if (from || to) {

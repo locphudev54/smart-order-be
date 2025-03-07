@@ -81,9 +81,8 @@ export class CustomersService {
   }
 
   // ----------------- AUTH SERVICES ----------------------
-  async validateCustomer(name: string, tableToken: string) {
+  async validateCustomer(tableToken: string) {
     // Mục đích chính của việc validate khách hàng là kiểm tra xem tableToken gửi lên có hợp lệ hay không
-    // Còn việc ktra tính duy nhất của tên khách hàng là không cần thiết
     await this.jwtService
       .verifyAsync<TableTokenPayload>(tableToken, {
         secret: this.configService.get('tableToken.secret')
@@ -100,8 +99,9 @@ export class CustomersService {
     if (table.status !== TableStatus.Available) {
       throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
+
     const customerCode = generateCustomerCode()
-    const newUser = await this.customerModel.create({ name, table: table._id, code: customerCode })
+    const newUser = await this.customerModel.create({ table: table._id, code: customerCode })
     await this.tablesService.update(table._id.toString(), { status: TableStatus.Occupied, customer: newUser._id })
 
     return newUser

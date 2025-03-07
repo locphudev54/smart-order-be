@@ -9,8 +9,8 @@ export class ValidateMongoIdPipe implements PipeTransform<string> {
       if (String(new ObjectId(value)) === value) {
         return value
       }
-      throw new BadRequestError('Param ObjectId của thực thể không hợp lệ')
+      throw new BadRequestError('Path Param của route này phải là định dạng ObjectId')
     }
-    throw new BadRequestError('Param ObjectId của thực thể không hợp lệ')
+    throw new BadRequestError('Path Param của route này phải là định dạng ObjectId')
   }
 }

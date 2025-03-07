@@ -11,11 +11,11 @@ export class LocalCustomerStrategy extends PassportStrategy(Strategy, 'local-cus
     private customersService: CustomersService,
     private readonly jwtService: JwtService
   ) {
-    super({ usernameField: 'name', passwordField: 'tableToken' })
+    super({ usernameField: 'tableToken', passwordField: 'tableToken' })
   }
 
-  async validate(name: string, tableToken: string): Promise<CustomerType> {
-    const customer = await this.customersService.validateCustomer(name, tableToken)
+  async validate(tableToken: string): Promise<CustomerType> {
+    const customer = await this.customersService.validateCustomer(tableToken)
     const decodedTableToken = this.jwtService.decode<TableTokenPayload>(tableToken)
     // Gán vào req.user
     return { _id: customer._id.toString(), table: decodedTableToken.tableNumber }

@@ -7,6 +7,7 @@ import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { OrdersService } from './orders.service'
+import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
 
 @Controller('orders')
 export class OrdersController {
@@ -22,7 +23,7 @@ export class OrdersController {
   @ResponseMessage('Lấy danh sách đơn hàng thành công')
   findAll(
     @Query() paginationQuery: PaginationQueryDto,
-    @Query() dateRangeQuery: DateRangeQueryDto,
+    @Query(ValidateDateRange) dateRangeQuery: DateRangeQueryDto,
     @Query() orderQuery: OrderQueryDto
   ) {
     return this.ordersService.findAll({ ...paginationQuery, ...dateRangeQuery, ...orderQuery })
