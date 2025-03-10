@@ -2,8 +2,11 @@ import { BadRequestException } from '@nestjs/common'
 import { extname } from 'path'
 
 export const imageFileFilter = (req, file: Express.Multer.File, callback) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-    return callback(new BadRequestException(`Không hỗ trợ tải file có định dạng ${extname(file.originalname)}`), false)
+  // Danh sách MIME type hợp lệ
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    return callback(new BadRequestException('Chỉ được upload file ảnh (jpg, jpeg, png, gif, webp)'), false)
   }
   callback(null, true)
 }

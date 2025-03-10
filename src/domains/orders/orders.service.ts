@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { OrderStatus, TableStatus } from 'core/constants/enum'
-import { BadRequestError, NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.exception'
+import { NotFoundError } from 'core/exceptions/errors.exception'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { generateOrderCode } from 'core/utils/utils'
@@ -12,13 +12,11 @@ import { TablesService } from 'domains/tables/tables.service'
 import { FilterQuery, Model, Types } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
-import { isAfter, isValid } from 'date-fns'
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-    @Inject(forwardRef(() => CustomersService))
     private readonly customersService: CustomersService,
     private readonly tablesService: TablesService
   ) {}
@@ -30,35 +28,30 @@ export class OrdersService {
       throw new NotFoundError('Bàn không tồn tại')
     }
 
-    let customerId: Types.ObjectId | undefined = undefined
-    // Kiểm tra xem đơn hàng mới cho bàn này là của khách hàng đang sử dụng hay là của khách hàng mới
-    if (table.customer) {
-      // Khách hàng đã đặt hoặc đang ngồi ở bàn
-      customerId = table.customer
-    } else {
-      // Khách hàng chưa đặt bàn
-      const newCustomer = await this.customersService.create({ table })
-      customerId = newCustomer._id
-    }
-
     let totalPrice = items.reduce((result, orderItem) => {
       return result + orderItem.price * orderItem.quantity
     }, 0)
 
-    const previousOrder = await this.orderModel.findOne({ customer: customerId })
-    if (!previousOrder) {
-      // TH1: Lần đầu đặt món ăn -> Tạo mới Order như bình thường
-      const orderCode = generateOrderCode()
-      return this.orderModel.create({
-        customer: customerId,
-        items,
-        table: table._id,
-        totalPrice,
-        code: orderCode
-      })
-    } else {
-      // TH2: Đã có đơn hàng trước đó -> Thêm mới các OrdeItem lúc sau vào mảng items
-      // Đồng nghĩa với việc đơn hàng sẽ có trạng thái là Pending
+    // ---------------- Khách hàng đang ngồi ở bàn -------------------------
+    if (table.customer) {
+      const customerId = table.customer
+      const previousOrder = await this.findOneByCustomerId(customerId.toString())
+      // TH1: + Đơn hàng liền kề trước của KH đã có trạng thái Canceled, Paid, Rejected -> tạo đơn hàng mới trên customerId cũ
+      //      + KH mới đăng nhập xong và trong lần đầu gọi món
+      if (
+        !previousOrder ||
+        (previousOrder && [OrderStatus.Canceled, OrderStatus.Paid, OrderStatus.Rejected].includes(previousOrder.status))
+      ) {
+        const orderCode = generateOrderCode()
+        return this.orderModel.create({
+          customer: customerId,
+          items,
+          table: table._id,
+          totalPrice,
+          code: orderCode
+        })
+      }
+      // TH2: Đã có đơn hàng trước đó và tiếp tục gọi thêm món -> thêm các đơn hàng lúc sau vào mảng items
       totalPrice = totalPrice + previousOrder.totalPrice
       return this.orderModel.findOneAndUpdate(
         {
@@ -75,6 +68,17 @@ export class OrdersService {
           returnOriginal: false
         }
       )
+    } else {
+      //TH3: Nhân viên tạo đơn hàng cho KH mới vô quán
+      const newCustomer = await this.customersService.create({ table })
+      const orderCode = generateOrderCode()
+      return this.orderModel.create({
+        customer: newCustomer._id,
+        items,
+        table: table._id,
+        totalPrice,
+        code: orderCode
+      })
     }
   }
 
@@ -164,7 +168,7 @@ export class OrdersService {
   }
 
   async findOneByCustomerId(customerId: string) {
-    const order = await this.orderModel.findOne({ customer: customerId }).populate([
+    const order = await this.orderModel.findOne({ customer: customerId }, {}, { sort: { createdAt: -1 } }).populate([
       { path: 'customer', select: ['_id', 'name'] },
       { path: 'items.dish' },
       {
@@ -172,9 +176,6 @@ export class OrdersService {
         select: ['-token', '-reservationLink']
       }
     ])
-    if (!order) {
-      throw new NotFoundError('Đơn hàng không tồn tại')
-    }
     return order
   }
 
@@ -184,11 +185,11 @@ export class OrdersService {
       throw new NotFoundError('Đơn hàng không tồn tại')
     }
 
-    if ([OrderStatus.Paid, OrderStatus.Canceled].includes(updateOrderDto.status)) {
-      await this.tablesService.update(order.table.id, { status: TableStatus.Available, customer: null })
-    } else {
-      await this.tablesService.update(order.table.id, { status: TableStatus.Occupied, customer: order.customer._id })
-    }
+    // if ([OrderStatus.Paid, OrderStatus.Canceled].includes(updateOrderDto.status)) {
+    //   await this.tablesService.update(order.table.id, { status: TableStatus.Available, customer: null })
+    // } else {
+    //   await this.tablesService.update(order.table.id, { status: TableStatus.Occupied, customer: order.customer._id })
+    // }
 
     return this.orderModel.findOneAndUpdate(
       {

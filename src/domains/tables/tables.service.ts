@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { TableStatus } from 'core/constants/enum'
 import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { CustomersService } from 'domains/customers/customers.service'
 import { CreateTableDto } from 'domains/tables/dto/create-table.dto'
 import { TableQueryDto } from 'domains/tables/dto/table-query.dto'
 import { UpdateTableDto } from 'domains/tables/dto/update-table.dto'
@@ -15,6 +16,8 @@ import { Model } from 'mongoose'
 export class TablesService {
   constructor(
     @InjectModel(Table.name) private readonly tableModel: Model<TableDocument>,
+    @Inject(forwardRef(() => CustomersService))
+    private readonly customersService: CustomersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {}
@@ -94,25 +97,35 @@ export class TablesService {
   }
 
   async update(id: string, updateTableDto: UpdateTableDto) {
-    const { changeToken, number, status } = updateTableDto
+    const { changeToken, status } = updateTableDto
 
-    const tableUpdate = await this.tableModel.findById(id)
-    if (!tableUpdate) {
+    const targetTable = await this.tableModel.findById(id).populate({
+      path: 'customer',
+      select: ['refreshToken']
+    })
+    if (!targetTable) {
       throw new NotFoundError('Bàn không tồn tại')
     }
 
-    const tableWithNumber = await this.findByTableNumber(number)
-    if (tableWithNumber) {
-      throw new BadRequestException(`Bàn ăn với số hiệu ${number} đã tồn tại`)
+    // Nếu thực hiện việc cập nhật số hiệu bàn thì cần ktra tính duy nhất của việc thêm mới bàn đó
+    if (updateTableDto.number) {
+      const tableWithNumber = await this.findByTableNumber(targetTable.number)
+      if (tableWithNumber) {
+        throw new BadRequestException(`Bàn ăn với số hiệu ${targetTable.number} đã tồn tại`)
+      }
     }
 
     if (!changeToken) {
       if (status === TableStatus.Available) {
         updateTableDto.customer = null
+        // TODO: Có cần cập nhật refresh token của customer sang '' hay không -> Có
+        // const { refreshToken } = targetTable.customer
+        // // Không cần await chỗ này
+        // this.customersService.logout({ refreshToken })
       }
       return this.tableModel.findOneAndUpdate({ _id: id }, updateTableDto, { returnOriginal: false })
     } else {
-      const newTableToken = await this.signTableToken(number)
+      const newTableToken = await this.signTableToken(targetTable.number)
       const reservationLink = this.createReservationLink(newTableToken)
       return this.tableModel.findOneAndUpdate(
         { _id: id },
@@ -135,6 +148,6 @@ export class TablesService {
   }
 
   createReservationLink(tableToken: string) {
-    return `${this.configService.get<string>('client.baseUrl')}/tables?token=${tableToken}`
+    return `${this.configService.get<string>('client.baseUrl')}/reservation?token=${tableToken}`
   }
 }

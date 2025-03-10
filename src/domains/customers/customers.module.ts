@@ -11,7 +11,7 @@ import { OrdersModule } from 'domains/orders/orders.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Customer.name, schema: CustomerSchema }]),
-    TablesModule,
+    forwardRef(() => TablesModule),
     forwardRef(() => OrdersModule)
   ],
   controllers: [CustomersController],

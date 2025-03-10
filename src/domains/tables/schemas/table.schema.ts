@@ -18,7 +18,7 @@ export class Table {
   status: TableStatus
 
   @Prop({ required: false, type: mongoose.Schema.Types.ObjectId, ref: 'Customer', default: null })
-  customer: Types.ObjectId
+  customer: CustomerDocument
 
   @Prop({ required: true, unique: true })
   reservationLink: string

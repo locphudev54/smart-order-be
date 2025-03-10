@@ -22,11 +22,11 @@ import { TableDocument } from 'domains/tables/schemas/table.schema'
 export class CustomersService {
   constructor(
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
+    @Inject(forwardRef(() => OrdersService))
+    private readonly ordersService: OrdersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly tablesService: TablesService,
-    @Inject(forwardRef(() => OrdersService))
-    private readonly ordersService: OrdersService
+    private readonly tablesService: TablesService
   ) {}
 
   // async create(createCustomerDto: CreateCustomerDto) {
@@ -55,6 +55,7 @@ export class CustomersService {
   }
 
   async findOrders(customer: CustomerType) {
+    // TODO: Có chắc sẽ tìm ra đơn hàng mới nhất của KH đó hay không
     return this.ordersService.findOneByCustomerId(customer._id)
   }
 
@@ -80,7 +81,7 @@ export class CustomersService {
     return this.customerModel.findOne({ code })
   }
 
-  // ----------------- AUTH SERVICES ----------------------
+  // ----------------- CUSTOMER AUTH SERVICES ----------------------
   async validateCustomer(tableToken: string) {
     // Mục đích chính của việc validate khách hàng là kiểm tra xem tableToken gửi lên có hợp lệ hay không
     await this.jwtService
@@ -129,7 +130,7 @@ export class CustomersService {
       throw new BadRequestError('Refresh Token không hợp lệ')
     }
     const tableId = customer.table.id
-    await Promise.all([
+    Promise.all([
       this.customerModel.updateOne({ refreshToken }, { refreshToken: '' }),
       this.tablesService.update(tableId, { status: TableStatus.Available, customer: null })
     ])

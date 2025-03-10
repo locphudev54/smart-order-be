@@ -7,6 +7,7 @@ import { AccountType, AuthTokenPayload } from 'core/types/type'
 import { AccountsService } from 'domains/accounts/accounts.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
+import { LoginOAuthDto } from 'domains/auth/dtos/login-oauth.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
@@ -45,6 +46,22 @@ export class AuthService {
       accessToken,
       refreshToken,
       account
+    }
+  }
+
+  async loginOAuth(loginOAuthBody: LoginOAuthDto) {
+    const account = await this.accountsService.findByEmail(loginOAuthBody.email)
+    if (account) {
+      // Xử lý giống login
+      const { email, _id, avatarUrl, role, fullName } = account
+      return this.login({ email, _id: _id.toString(), avatarUrl, role, fullName })
+    } else {
+      // Xử lý giống register
+      return this.register({
+        email: loginOAuthBody.email,
+        password: `${Math.ceil(Math.random() * 100000)}`,
+        fullName: loginOAuthBody.email
+      })
     }
   }
 
@@ -161,7 +178,7 @@ export class AuthService {
       const decodedRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshToken, {
         secret: this.configService.get<string>('employeeRefreshToken.secret')
       })
-      await this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
+      this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
     } catch (error) {
       if (error instanceof TokenExpiredError) {
         throw new UnauthorizedError('Refresh Token hết hạn')

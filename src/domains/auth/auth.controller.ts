@@ -7,6 +7,7 @@ import { AccountType } from 'core/types/type'
 import { AuthService } from 'domains/auth/auth.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
+import { LoginOAuthDto } from 'domains/auth/dtos/login-oauth.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
@@ -21,6 +22,12 @@ export class AuthController {
   @ResponseMessage('Login thành công')
   login(@Request() req) {
     return this.authService.login(req.user as AccountType)
+  }
+
+  @Public()
+  @Post('login/oauth')
+  handleOAuth(@Body() loginOAuthBody: LoginOAuthDto) {
+    return this.authService.loginOAuth(loginOAuthBody)
   }
 
   @Public()

@@ -24,18 +24,27 @@ export class ValidateDateRange
     const toDate = new Date(value.to)
 
     if (!isValid(fromDate)) {
-      throw new UnprocessableEntityError([{ field: 'from', message: 'from có giá trị Date không hợp lệ' }])
+      throw new UnprocessableEntityError(
+        [{ field: 'from', message: 'from có giá trị Date không hợp lệ' }],
+        'Giá trị ngày lọc không hợp lệ'
+      )
     }
 
     if (!isValid(toDate)) {
-      throw new UnprocessableEntityError([{ field: 'to', message: 'to có giá trị Date không hợp lệ' }])
+      throw new UnprocessableEntityError(
+        [{ field: 'to', message: 'to có giá trị Date không hợp lệ' }],
+        'Giá trị ngày lọc không hợp lệ'
+      )
     }
 
     if (isAfter(fromDate, toDate)) {
-      throw new UnprocessableEntityError([
-        { field: 'from', message: 'from phải nhỏ hơn to' },
-        { field: 'to', message: 'to phải lớn hơn from' }
-      ])
+      throw new UnprocessableEntityError(
+        [
+          { field: 'from', message: 'from phải nhỏ hơn to' },
+          { field: 'to', message: 'to phải lớn hơn from' }
+        ],
+        'Giá trị ngày lọc không hợp lệ'
+      )
     }
 
     return {
