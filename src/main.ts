@@ -1,17 +1,19 @@
-import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
-import helmet from 'helmet'
-import { ConfigService } from '@nestjs/config'
 import { VersioningType } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
+import helmet from 'helmet'
 import path from 'path'
-import { customAlphabet } from 'nanoid'
-import { OrderStatus } from 'core/constants/enum'
+import cookieParser from 'cookie-parser'
+import { AppModule } from './app.module'
+import moment from 'moment-timezone'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   app.use(helmet())
+
+  console.log(moment.tz(Date.now(), 'Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm:ss.SSSZ'))
 
   const configService = app.get(ConfigService)
   const port = configService.get<number>('port')
@@ -32,6 +34,8 @@ async function bootstrap() {
   })
 
   app.enableCors({ origin: '*' })
+
+  app.use(cookieParser())
 
   await app.listen(port)
 }

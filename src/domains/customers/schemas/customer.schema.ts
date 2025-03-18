@@ -9,8 +9,8 @@ export class Customer {
   @Prop({ required: true, unique: true })
   code: string
 
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Table' })
-  table: TableDocument
+  @Prop({ required: true, type: Number })
+  tableNumber: number
 
   @Prop({ default: '' })
   refreshToken?: string

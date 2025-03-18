@@ -10,19 +10,20 @@ import ms, { StringValue } from 'ms'
 import { TablesService } from 'domains/tables/tables.service'
 import { TableStatus } from 'core/constants/enum'
 import { RefreshTokenDto } from 'domains/customers/dto/refresh-token.dto'
-import { LogoutDto } from 'domains/customers/dto/logout.dto'
 import { OrdersService } from 'domains/orders/orders.service'
 import { BadRequestError, NotFoundError, UnauthorizedError } from 'core/exceptions/errors.exception'
 import { generateCustomerCode } from 'core/utils/utils'
 import { CreateOrderDto } from 'domains/orders/dto/create-order.dto'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 import { TableDocument } from 'domains/tables/schemas/table.schema'
+import { Request, Response } from 'express'
+import { LogoutDto } from 'domains/customers/dto/logout.dto'
 
 @Injectable()
 export class CustomersService {
   constructor(
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
-    @Inject(forwardRef(() => OrdersService))
+    // @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -36,14 +37,11 @@ export class CustomersService {
     // const { tableNumber } = createCustomerDto
     // const table = await this.tablesService.findByTableNumber(tableNumber)
 
-    // if (!table) {
-    //   throw new BadRequestError('Bàn không tồn tại')
-    // }
-    // if (table.status !== TableStatus.Available) {
-    //   throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
-    // }
+    if (table.status !== TableStatus.Available) {
+      throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
+    }
     const customerCode = generateCustomerCode()
-    const newCustomer = await this.customerModel.create({ table: table.id, code: customerCode })
+    const newCustomer = await this.customerModel.create({ tableNumber: table.number, code: customerCode })
     await this.tablesService.update(table.id, { status: TableStatus.Occupied, customer: newCustomer._id })
 
     return newCustomer
@@ -51,22 +49,15 @@ export class CustomersService {
 
   createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType) {
     const { items } = createOrderDto
-    return this.ordersService.create({ tableNumber: customer.table, items })
+    return this.ordersService.create({ tableNumber: customer.tableNumber, items }, true)
   }
 
   async findOrders(customer: CustomerType) {
-    // TODO: Có chắc sẽ tìm ra đơn hàng mới nhất của KH đó hay không
-    return this.ordersService.findOneByCustomerId(customer._id)
+    return this.ordersService.findAll({ customerCode: customer.code })
   }
 
   async findOne(id: string) {
-    const customer = await this.customerModel
-      .findOne({ _id: id })
-      .populate({
-        path: 'table',
-        select: ['_id', 'number', 'capacity', 'status']
-      })
-      .select(['-refreshToken'])
+    const customer = await this.customerModel.findOne({ _id: id }).select(['-refreshToken'])
     if (!customer) {
       throw new NotFoundError('Khách hàng không tồn tại')
     }
@@ -79,6 +70,10 @@ export class CustomersService {
 
   findByCode(code: string) {
     return this.customerModel.findOne({ code })
+  }
+
+  removeRefreshToken(id: string) {
+    return this.customerModel.updateOne({ _id: id }, { refreshToken: '' })
   }
 
   // ----------------- CUSTOMER AUTH SERVICES ----------------------
@@ -102,9 +97,8 @@ export class CustomersService {
     }
 
     const customerCode = generateCustomerCode()
-    const newUser = await this.customerModel.create({ table: table._id, code: customerCode })
+    const newUser = await this.customerModel.create({ tableNumber: table.number, code: customerCode })
     await this.tablesService.update(table._id.toString(), { status: TableStatus.Occupied, customer: newUser._id })
-
     return newUser
   }
 
@@ -122,14 +116,15 @@ export class CustomersService {
       customer
     }
   }
-
   async logout(logoutDto: LogoutDto) {
     const { refreshToken } = logoutDto
-    const customer = await this.customerModel.findOne({ refreshToken }).populate({ path: 'table', select: ['_id'] })
+    const customer = await this.customerModel.findOne({ refreshToken })
     if (!customer) {
       throw new BadRequestError('Refresh Token không hợp lệ')
     }
-    const tableId = customer.table.id
+    const table = await this.tablesService.findByTableNumber(customer.tableNumber)
+    const tableId = table._id.toString()
+
     Promise.all([
       this.customerModel.updateOne({ refreshToken }, { refreshToken: '' }),
       this.tablesService.update(tableId, { status: TableStatus.Available, customer: null })
@@ -137,16 +132,19 @@ export class CustomersService {
   }
 
   async refreshToken(refreshTokenDto: RefreshTokenDto) {
+    let customerId: undefined | string = undefined
     try {
       const { refreshToken } = refreshTokenDto
       const customer = await this.findByRefreshToken(refreshToken)
       if (!customer || !refreshToken) {
-        throw new UnauthorizedError('Refresh Token không hợp lệ')
+        throw new UnauthorizedError('INVALID_REFRESH_TOKEN')
       }
 
+      customerId = customer._id.toString()
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<CustomerTokenPayload>(refreshToken, {
         secret: this.configService.get<string>('customerRefreshToken.secret')
       })
+
       const { iat, exp, ...payload } = decodedOldRefreshToken
       const [accessToken, newRefreshToken] = await Promise.all([
         this.signCustomerAccessToken(payload),
@@ -161,7 +159,10 @@ export class CustomersService {
       }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedError('Refresh Token hết hạn')
+        if (customerId) {
+          this.customerModel.updateOne({ _id: customerId }, { refreshToken: '' })
+        }
+        throw new UnauthorizedError('REFRESH_TOKEN_EXPIRED')
       }
       throw error
     }

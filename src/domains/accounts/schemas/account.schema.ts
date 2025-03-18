@@ -9,7 +9,7 @@ export class Account {
   @Prop({ type: SchemaTypes.ObjectId })
   _id: Types.ObjectId
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true, unique: true })
   email: string
 
   @Prop({ required: true })

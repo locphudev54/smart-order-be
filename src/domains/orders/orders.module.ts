@@ -1,10 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common'
-import { OrdersService } from './orders.service'
-import { OrdersController } from './orders.controller'
 import { MongooseModule } from '@nestjs/mongoose'
-import { Order, OrderSchema } from 'domains/orders/schemas/order.schema'
 import { CustomersModule } from 'domains/customers/customers.module'
+import { Order, OrderSchema } from 'domains/orders/schemas/order.schema'
 import { TablesModule } from 'domains/tables/tables.module'
+import { OrdersController } from './orders.controller'
+import { OrdersService } from './orders.service'
+import { OrdersGateway } from 'domains/orders/orders.gateway'
+import { JwtService } from '@nestjs/jwt'
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import { TablesModule } from 'domains/tables/tables.module'
     TablesModule
   ],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [OrdersService, JwtService, OrdersGateway],
   exports: [OrdersService]
 })
 export class OrdersModule {}

@@ -15,17 +15,6 @@ import {
 import { OrderStatus } from 'core/constants/enum'
 import { IsUniqueArray } from 'core/decorators/is-unique-array.decorator'
 
-export class OrderStatusQueryDto {
-  @IsEnum(OrderStatus, {
-    each: true,
-    message: `Các phần tử trong mảng status phải là một trong những giá trị sau: ${Object.values(OrderStatus).join(' || ')}`
-  })
-  @IsArray({ message: 'status phải là định dạng mảng' })
-  @Type(() => String)
-  @Transform(({ value }) => value.split(','))
-  @IsOptional()
-  status?: OrderStatus[] | undefined
-}
 export class OrderQueryDto {
   @MinLength(5, { message: 'sort phải có ít nhất 5 ký tự' })
   @IsString({ message: 'sort phải là định dạng chuỗi' })

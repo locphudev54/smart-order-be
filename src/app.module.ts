@@ -10,7 +10,7 @@ import { OrdersModule } from './domains/orders/orders.module'
 import { CaslAbilityFactory } from 'core/casl/casl-ability.factory'
 import { TablesModule } from './domains/tables/tables.module'
 import { CustomersModule } from './domains/customers/customers.module'
-
+import { ChatGateway } from 'domains/chat/chat.gateway'
 @Module({
   imports: [
     CoreModule,
@@ -21,6 +21,7 @@ import { CustomersModule } from './domains/customers/customers.module'
     OrdersModule,
     TablesModule,
     CustomersModule
+    // ChatModule
   ],
   controllers: [AppController],
   providers: [AppService, CaslAbilityFactory]

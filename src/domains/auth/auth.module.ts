@@ -7,6 +7,7 @@ import { LocalEmployeeStrategy } from 'domains/auth/local-employee.strategy'
 import { JwtEmployeeStrategy } from 'domains/auth/jwt-employee.strategy'
 import { AccountsModule } from 'domains/accounts/accounts.module'
 import { CaslModule } from 'core/casl/casl.module'
+import { ChatGateway } from 'domains/chat/chat.gateway'
 
 @Module({
   imports: [PassportModule, AccountsModule, CaslModule],

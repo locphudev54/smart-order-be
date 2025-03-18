@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Request, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Patch, Post, Req, Request, Res, UseGuards } from '@nestjs/common'
 import { Account } from 'core/decorators/account.decorator'
 import { Public } from 'core/decorators/public.decorator'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
@@ -8,19 +8,21 @@ import { AuthService } from 'domains/auth/auth.service'
 import { ChangePasswordDto } from 'domains/auth/dtos/change-password.dto'
 import { ForgotPasswordtDto } from 'domains/auth/dtos/forgot-password.dto'
 import { LoginOAuthDto } from 'domains/auth/dtos/login-oauth.dto'
+import { LoginDto } from 'domains/auth/dtos/login.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
+import { Request as RequestType, Response } from 'express'
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @UseGuards(LocalEmployeeAuthGuard)
   @Post('login')
+  @UseGuards(LocalEmployeeAuthGuard)
   @ResponseMessage('Login thành công')
-  login(@Request() req) {
+  login(@Body() loginDto: LoginDto, @Request() req) {
     return this.authService.login(req.user as AccountType)
   }
 
@@ -52,7 +54,6 @@ export class AuthController {
   changePassword(@Body() changePasswordDto: ChangePasswordDto, @Account() account: AccountType) {
     return this.authService.changePassword(changePasswordDto, account)
   }
-
   @Post('logout')
   logout(@Body() logoutDto: LogoutDto) {
     return this.authService.logout(logoutDto)

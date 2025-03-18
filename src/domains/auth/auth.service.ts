@@ -11,6 +11,7 @@ import { LoginOAuthDto } from 'domains/auth/dtos/login-oauth.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
+import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import ms, { StringValue } from 'ms'
 
@@ -56,12 +57,13 @@ export class AuthService {
       const { email, _id, avatarUrl, role, fullName } = account
       return this.login({ email, _id: _id.toString(), avatarUrl, role, fullName })
     } else {
+      throw new BadRequestError('ACCOUNT_NOT_EXIST_IN_SYSTEM')
       // Xử lý giống register
-      return this.register({
-        email: loginOAuthBody.email,
-        password: `${Math.ceil(Math.random() * 100000)}`,
-        fullName: loginOAuthBody.email
-      })
+      // return this.register({
+      //   email: loginOAuthBody.email,
+      //   password: `${Math.ceil(Math.random() * 100000)}`,
+      //   fullName: loginOAuthBody.email
+      // })
     }
   }
 
@@ -106,12 +108,14 @@ export class AuthService {
   }
 
   async refreshToken(refreshTokenDto: RefreshTokenDto) {
+    let accountId: string | undefined = undefined
     try {
       const account = await this.accountsService.findByRefreshToken(refreshTokenDto.refreshToken)
       if (!account || !refreshTokenDto.refreshToken) {
-        throw new UnauthorizedError('Refresh Token không hợp lệ')
+        throw new UnauthorizedError('INVALID_REFRESH_TOKEN')
       }
 
+      accountId = account._id.toString()
       const decodedOldRefreshToken = await this.jwtService.verifyAsync<AuthTokenPayload>(refreshTokenDto.refreshToken, {
         secret: this.configService.get<string>('employeeRefreshToken.secret')
       })
@@ -122,7 +126,6 @@ export class AuthService {
         this.signRefreshToken(payload, decodedOldRefreshToken.exp)
       ])
       await this.accountsService.updateRefreshToken(account._id.toString(), refreshToken)
-
       return {
         accessToken,
         refreshToken,
@@ -130,7 +133,10 @@ export class AuthService {
       }
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedError('Refresh Token hết hạn')
+        if (accountId) {
+          this.accountsService.updateRefreshToken(accountId, '')
+        }
+        throw new UnauthorizedError('REFRESH_TOKEN_EXPIRED')
       }
       throw error
     }
@@ -181,7 +187,7 @@ export class AuthService {
       this.accountsService.updateRefreshToken(decodedRefreshToken._id.toString(), '')
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new UnauthorizedError('Refresh Token hết hạn')
+        throw new UnauthorizedError('REFRESH_TOKEN_EXPIRED')
       }
       throw error
     }
@@ -207,5 +213,14 @@ export class AuthService {
       secret: this.configService.get<string>('employeeRefreshToken.secret'),
       expiresIn: ms(this.configService.get<StringValue>('employeeRefreshToken.expiresIn')) / 1000
     })
+  }
+
+  public async getUserFromAuthenticationToken(token: string) {
+    const payload: AuthTokenPayload = this.jwtService.verify(token, {
+      secret: this.configService.get<string>('employeeAccessToken.secret')
+    })
+    if (payload._id) {
+      return this.accountsService.findOne(payload._id)
+    }
   }
 }

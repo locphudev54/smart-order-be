@@ -2,8 +2,6 @@ import { ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { TokenExpiredError } from '@nestjs/jwt'
 import { AuthGuard } from '@nestjs/passport'
-import { IS_AUTHENTICATED_USER_ACCESS } from 'core/decorators/authenticated-user-access.decorator'
-import { IS_CUSTOMER_ROUTE } from 'core/decorators/customer-route.decorator'
 import { IS_PUBLIC_KEY } from 'core/decorators/public.decorator'
 import { UnauthorizedError } from 'core/exceptions/errors.exception'
 import { Request } from 'express'
@@ -26,7 +24,7 @@ export class JwtCustomerAuthGuard extends AuthGuard('jwt-customer') {
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
     if (!token) {
-      throw new UnauthorizedError('Không nhận được Access Token')
+      throw new UnauthorizedError('ACCESS_TOKEN_REQUIRED')
     }
 
     return super.canActivate(context)
@@ -39,11 +37,11 @@ export class JwtCustomerAuthGuard extends AuthGuard('jwt-customer') {
 
   handleRequest(err, user, info) {
     if (info instanceof TokenExpiredError) {
-      throw new UnauthorizedError('Access Token hết hạn')
+      throw new UnauthorizedError('ACCESS_TOKEN_EXPIRED')
     }
 
     if (err || !user) {
-      throw err || new UnauthorizedError('Access Token không hợp lệ')
+      throw err || new UnauthorizedError('INVALID_ACCESS_TOKEN')
     }
     return user
   }

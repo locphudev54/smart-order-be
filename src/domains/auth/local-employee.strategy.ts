@@ -12,7 +12,16 @@ export class LocalEmployeeStrategy extends PassportStrategy(Strategy, 'local-emp
   }
 
   async validate(email: string, password: string): Promise<AccountType> {
-    const account = await this.authService.validateAccount(email, password)
+    // validate email & password
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      throw new UnprocessableEntityError([{ message: 'Email không hợp lệ', field: 'email' }])
+    }
+
+    if (!password || password.length < 8) {
+      throw new UnprocessableEntityError([{ message: 'Mật khẩu phải có ít nhất  ký tự', field: 'password' }])
+    }
+
+    const account = await this.authService.validateAccount(email, password.toString())
     if (!account) {
       throw new UnprocessableEntityError([{ field: 'password', message: 'Email/Password không tồn tại trên hệ thống' }])
     }

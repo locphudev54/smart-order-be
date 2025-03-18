@@ -99,9 +99,9 @@ export class TablesService {
   async update(id: string, updateTableDto: UpdateTableDto) {
     const { changeToken, status } = updateTableDto
 
-    const targetTable = await this.tableModel.findById(id).populate({
+    const targetTable = await this.tableModel.findOne({ _id: id }).populate({
       path: 'customer',
-      select: ['refreshToken']
+      select: ['_id']
     })
     if (!targetTable) {
       throw new NotFoundError('Bàn không tồn tại')
@@ -115,24 +115,29 @@ export class TablesService {
       }
     }
 
-    if (!changeToken) {
-      if (status === TableStatus.Available) {
-        updateTableDto.customer = null
-        // TODO: Có cần cập nhật refresh token của customer sang '' hay không -> Có
-        // const { refreshToken } = targetTable.customer
-        // // Không cần await chỗ này
-        // this.customersService.logout({ refreshToken })
-      }
-      return this.tableModel.findOneAndUpdate({ _id: id }, updateTableDto, { returnOriginal: false })
-    } else {
+    if (changeToken) {
       const newTableToken = await this.signTableToken(targetTable.number)
       const reservationLink = this.createReservationLink(newTableToken)
+
+      if (status === TableStatus.Available && targetTable.customer !== null) {
+        updateTableDto.customer = null
+        const customerId = targetTable.customer?._id
+        this.customersService.removeRefreshToken(customerId.toString())
+      }
+
       return this.tableModel.findOneAndUpdate(
         { _id: id },
         { ...updateTableDto, reservationLink, token: newTableToken },
         { returnOriginal: false }
       )
     }
+
+    if (status === TableStatus.Available && targetTable.customer !== null) {
+      updateTableDto.customer = null
+      const customerId = targetTable.customer?._id
+      this.customersService.removeRefreshToken(customerId.toString())
+    }
+    return this.tableModel.findOneAndUpdate({ _id: id }, updateTableDto, { returnOriginal: false })
   }
 
   async remove(id: string) {

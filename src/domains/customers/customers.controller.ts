@@ -1,17 +1,16 @@
-import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Request, Get, Res, Req } from '@nestjs/common'
 import { CustomersService } from './customers.service'
-import { CreateCustomerDto } from './dto/create-customer.dto'
 import { Public } from 'core/decorators/public.decorator'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
 import { CustomerType } from 'core/types/type'
 import { LocalCustomerAuthGuard } from 'core/guards/local-customer-auth.guard'
 import { RefreshTokenDto } from 'domains/customers/dto/refresh-token.dto'
-import { LogoutDto } from 'domains/customers/dto/logout.dto'
 import { Customer } from 'core/decorators/customer.decorator'
 import { CustomerRoute } from 'core/decorators/customer-route.decorator'
 import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
-import { CreateOrderDto } from 'domains/orders/dto/create-order.dto'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
+import { Request as RequestType, Response } from 'express'
+import { LogoutDto } from 'domains/customers/dto/logout.dto'
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}

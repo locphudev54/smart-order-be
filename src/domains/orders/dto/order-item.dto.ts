@@ -1,13 +1,11 @@
 import { Transform } from 'class-transformer'
 import { IsEnum, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator'
-import { OrderStatus } from 'core/constants/enum'
-import { DishDocument } from 'domains/dishes/schemas/dish.schema'
 import { Types } from 'mongoose'
 
 export class OrderItemDto {
   @IsMongoId({ message: 'dish phải là định dạng ObjectId' })
   @IsNotEmpty({ message: 'dish không được bỏ trống' })
-  dish: DishDocument
+  dish: Types.ObjectId
 
   @Min(1, { message: 'quantity phải > 0' })
   @IsInt({ message: 'quantity phải là định dạng số nguyên' })

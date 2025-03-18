@@ -36,7 +36,7 @@ export class JwtEmployeeAuthGuard extends AuthGuard('jwt-employee') {
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
     if (!token) {
-      throw new UnauthorizedError('Không nhận được Access Token')
+      throw new UnauthorizedError('ACCESS_TOKEN_REQUIRED')
     }
 
     return super.canActivate(context)
@@ -50,11 +50,11 @@ export class JwtEmployeeAuthGuard extends AuthGuard('jwt-employee') {
   handleRequest(err, user, info) {
     // You can throw an exception based on either "info" or "err" arguments
     if (info instanceof TokenExpiredError) {
-      throw new UnauthorizedError('Access Token hết hạn')
+      throw new UnauthorizedError('ACCESS_TOKEN_EXPIRED')
     }
 
     if (err || !user) {
-      throw err || new UnauthorizedError('Access Token không hợp lệ')
+      throw err || new UnauthorizedError('INVALID_ACCESS_TOKEN')
     }
     return user
   }

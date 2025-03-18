@@ -26,7 +26,7 @@ export class JwtAuthenticatedAuthGuard extends AuthGuard(['jwt-customer', 'jwt-e
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
     if (!token) {
-      throw new UnauthorizedError('Không nhận được Access Token')
+      throw new UnauthorizedError('ACCESS_TOKEN_REQUIRED')
     }
 
     return super.canActivate(context)
@@ -42,11 +42,11 @@ export class JwtAuthenticatedAuthGuard extends AuthGuard(['jwt-customer', 'jwt-e
       info instanceof TokenExpiredError ||
       (Array.isArray(info) && info.some((inforItem) => inforItem instanceof TokenExpiredError))
     ) {
-      throw new UnauthorizedError('Access Token hết hạn')
+      throw new UnauthorizedError('ACCESS_TOKEN_EXPIRED')
     }
 
     if (err || !user) {
-      throw err || new UnauthorizedError('Access Token không hợp lệ')
+      throw err || new UnauthorizedError('INVALID_ACCESS_TOKEN')
     }
     return user
   }

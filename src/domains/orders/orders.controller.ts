@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
 import { ValidateMongoIdPipe } from 'core/pipes/validate-mongo-id.pipe'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
@@ -8,6 +8,7 @@ import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { OrdersService } from './orders.service'
 import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
+import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
 
 @Controller('orders')
 export class OrdersController {
@@ -39,5 +40,16 @@ export class OrdersController {
   @ResponseMessage('Cập nhật đơn hàng thành công')
   update(@Param('id', ValidateMongoIdPipe) id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(id, updateOrderDto)
+  }
+
+  @Delete('bulk-delete')
+  removeBulk(@Body() body: DeleteBulkDto) {
+    return this.ordersService.removeBulk(body)
+  }
+
+  @Delete(':id')
+  @ResponseMessage('Xoá đơn hàng thành công')
+  remove(@Param('id', ValidateMongoIdPipe) id: string) {
+    return this.ordersService.remove(id)
   }
 }
