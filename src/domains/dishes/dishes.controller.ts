@@ -7,11 +7,14 @@ import { DishQueryDto } from 'domains/dishes/dto/dish-query.dto'
 import { DishesService } from './dishes.service'
 import { CreateDishDto } from './dto/create-dish.dto'
 import { UpdateDishDto } from './dto/update-dish.dto'
+import { Roles } from 'core/decorators/roles.decorator'
+import { Role } from 'core/constants/enum'
 @Controller('dishes')
 export class DishesController {
   constructor(private readonly dishesService: DishesService) {}
 
   @Post()
+  @Roles([Role.Manager, Role.Chef])
   @ResponseMessage('Tạo món ăn thành công')
   create(@Body() createDishDto: CreateDishDto) {
     return this.dishesService.create(createDishDto)
@@ -24,19 +27,23 @@ export class DishesController {
     return this.dishesService.findAll({ ...paginationQuery, ...tableQuery })
   }
 
+  @Public()
   @Get(':id')
+  @Roles([Role.Manager, Role.Chef])
   @ResponseMessage('Lấy chi tiết món ăn thành công')
   findOne(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.dishesService.findOne(id)
   }
 
   @Patch(':id')
+  @Roles([Role.Manager, Role.Chef])
   @ResponseMessage('Cập nhật món ăn thành công')
   update(@Param('id', ValidateMongoIdPipe) id: string, @Body() updateDishDto: UpdateDishDto) {
     return this.dishesService.update(id, updateDishDto)
   }
 
   @Delete(':id')
+  @Roles([Role.Manager, Role.Chef])
   @ResponseMessage('Xóa món ăn thành công')
   remove(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.dishesService.remove(id)

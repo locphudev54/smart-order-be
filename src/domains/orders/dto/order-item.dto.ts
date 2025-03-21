@@ -9,14 +9,14 @@ export class OrderItemDto {
 
   @Min(1, { message: 'quantity phải > 0' })
   @IsInt({ message: 'quantity phải là định dạng số nguyên' })
-  @IsNotEmpty({ message: 'quantity không được bỏ trống' })
   @Transform(({ value }) => Number(value))
+  @IsNotEmpty({ message: 'quantity không được bỏ trống' })
   quantity: number
 
   @Min(1, { message: 'price phải > 0' })
   @IsNumber({ allowNaN: false }, { message: 'price phải là định dạng số' })
-  @IsNotEmpty({ message: 'price không được bỏ trống' })
   @Transform(({ value }) => Number(value))
+  @IsNotEmpty({ message: 'price không được bỏ trống' })
   price: number
 
   @MaxLength(100, { message: 'note không được vượt quá 100 kí tự' })

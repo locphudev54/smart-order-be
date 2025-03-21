@@ -1,5 +1,6 @@
 import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator'
 
+// TODO: Validator sau chỉ mới validate cho kiểu Primitives type || Còn Complex / Object Type thì chưa validate được
 @ValidatorConstraint({ name: 'IsUniqueArray', async: false })
 export class IsUniqueArrayConstraint implements ValidatorConstraintInterface {
   validate(value: any[], args: ValidationArguments) {

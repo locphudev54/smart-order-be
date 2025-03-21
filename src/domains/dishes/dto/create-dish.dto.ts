@@ -17,8 +17,8 @@ export class CreateDishDto {
 
   @Min(1, { message: 'price phải > 0' })
   @IsNumber({ allowNaN: false }, { message: 'price phải là định dạng số' })
-  @IsNotEmpty({ message: 'price không được bỏ trống' })
   @Transform(({ value }) => Number(value))
+  @IsNotEmpty({ message: 'price không được bỏ trống' })
   price: number
 
   @IsEnum(DishStatus, {
@@ -28,7 +28,7 @@ export class CreateDishDto {
   status?: DishStatus
 
   @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
-  @IsOptional() // Tác dụng khi gọi API
+  @IsOptional()
   @Transform(({ value }) => String(value).trim())
-  imageUrl?: string // ? Tác dụng cho TS check
+  imageUrl?: string
 }

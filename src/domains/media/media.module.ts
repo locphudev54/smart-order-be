@@ -5,16 +5,11 @@ import { ConfigService } from '@nestjs/config'
 import { MediaService } from './media.service'
 import { JwtCustomerStrategy } from 'domains/customers/jwt-customer.strategy'
 import { JwtEmployeeStrategy } from 'domains/auth/jwt-employee.strategy'
+import { CloudinaryModule } from 'domains/cloudinary/cloudinary.module'
+import { imageFileFilter } from 'domains/media/media-upload.utils'
 
 @Module({
-  imports: [
-    MulterModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
-        dest: configService.get<string>('multerDest')
-      }),
-      inject: [ConfigService]
-    })
-  ],
+  imports: [CloudinaryModule],
   controllers: [MediaController],
   providers: [MediaService, JwtCustomerStrategy, JwtEmployeeStrategy]
 })

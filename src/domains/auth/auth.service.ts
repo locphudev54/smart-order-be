@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
+import axios from 'axios'
 import { Role } from 'core/constants/enum'
 import { BadRequestError, NotFoundError, UnauthorizedError } from 'core/exceptions/errors.exception'
 import { AccountType, AuthTokenPayload } from 'core/types/type'
@@ -11,7 +12,6 @@ import { LoginOAuthDto } from 'domains/auth/dtos/login-oauth.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
-import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import ms, { StringValue } from 'ms'
 
@@ -51,36 +51,39 @@ export class AuthService {
   }
 
   async loginOAuth(loginOAuthBody: LoginOAuthDto) {
+    const { accessToken, email, provider, avatarUrl } = loginOAuthBody
+
     const account = await this.accountsService.findByEmail(loginOAuthBody.email)
-    if (account) {
-      // Xử lý giống login
-      const { email, _id, avatarUrl, role, fullName } = account
-      return this.login({ email, _id: _id.toString(), avatarUrl, role, fullName })
-    } else {
+    if (!account) {
       throw new BadRequestError('ACCOUNT_NOT_EXIST_IN_SYSTEM')
-      // Xử lý giống register
-      // return this.register({
-      //   email: loginOAuthBody.email,
-      //   password: `${Math.ceil(Math.random() * 100000)}`,
-      //   fullName: loginOAuthBody.email
-      // })
     }
+
+    const isValid = await this.verifyOAuthToken(provider, accessToken, email)
+    if (!isValid) {
+      throw new BadRequestError(`Invalid OAuth token (${provider.toUpperCase()})`)
+    }
+
+    const { _id, role, fullName } = account
+    if (account.avatarUrl !== avatarUrl) {
+      this.accountsService.update(_id.toString(), { avatarUrl })
+    }
+    return this.login({ email, _id: _id.toString(), avatarUrl, role, fullName })
   }
 
   async register(registerAccountDto: RegisterAccountDto) {
     const { email, fullName, password } = registerAccountDto
 
-    const accountId = new mongoose.Types.ObjectId()
+    const accountId = new mongoose.Types.ObjectId().toString()
     const [accessToken, refreshToken] = await Promise.all([
       this.signAccessToken({
-        _id: accountId.toString(),
+        _id: accountId,
         email,
         fullName,
         role: Role.Waiter,
         avatarUrl: ''
       }),
       this.signRefreshToken({
-        _id: accountId.toString(),
+        _id: accountId,
         email,
         fullName,
         role: Role.Waiter,
@@ -91,9 +94,9 @@ export class AuthService {
       email,
       password,
       fullName,
-      refreshToken,
-      _id: accountId.toString()
+      _id: accountId
     })
+    this.accountsService.updateRefreshToken(accountId, refreshToken)
 
     // const ability = this.caslAbilityFactory.createForUser(account)
     // ability.can(Action.Read, Dish) // true
@@ -221,6 +224,24 @@ export class AuthService {
     })
     if (payload._id) {
       return this.accountsService.findOne(payload._id)
+    }
+  }
+
+  async verifyOAuthToken(provider: string, token: string, email: string): Promise<boolean> {
+    try {
+      let url
+      if (provider === 'google') {
+        url = `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`
+      } else if (provider === 'facebook') {
+        url = `https://graph.facebook.com/me?access_token=${token}&fields=email`
+      } else {
+        return false
+      }
+
+      const response = await axios.get(url)
+      return response.data.email === email
+    } catch (error) {
+      return false
     }
   }
 }

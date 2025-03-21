@@ -1,10 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { OrderStatus } from 'core/constants/enum'
 import { CustomerDocument } from 'domains/customers/schemas/customer.schema'
-import mongoose, { type Types } from 'mongoose'
-import timeZone from 'mongoose-timezone'
 import { DishDocument } from 'domains/dishes/schemas/dish.schema'
-import moment from 'moment-timezone'
+import mongoose from 'mongoose'
 
 export type OrderDocument = mongoose.HydratedDocument<Order>
 
@@ -14,13 +12,13 @@ export type OrderDocument = mongoose.HydratedDocument<Order>
   collection: 'Orders'
 })
 export class Order {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Customer' })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Customer' })
   customer: CustomerDocument
 
-  @Prop({ required: true, unique: false })
+  @Prop({ required: true, unique: false, type: String })
   code: string
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Dish' })
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Dish' })
   dish: DishDocument
 
   @Prop({ required: true, type: Number })
@@ -32,10 +30,10 @@ export class Order {
   @Prop({ required: true })
   totalPrice: number
 
-  @Prop({ default: '' })
+  @Prop({ required: false, type: String, default: '' })
   note: string
 
-  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Pending })
+  @Prop({ required: false, type: String, enum: OrderStatus, default: OrderStatus.Pending })
   status?: OrderStatus
 
   @Prop({ required: true, type: Number })

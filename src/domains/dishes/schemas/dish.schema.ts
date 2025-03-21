@@ -6,20 +6,20 @@ export type DishDocument = HydratedDocument<Dish>
 
 @Schema({ timestamps: true, versionKey: false, collection: 'Dishes' })
 export class Dish {
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   title: string
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   description: string
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   price: number
 
-  @Prop({ type: String, enum: DishStatus, default: DishStatus.Available })
+  @Prop({ required: false, type: String, enum: DishStatus, default: DishStatus.Available })
   status: DishStatus
 
-  @Prop({ default: '' })
-  imageUrl?: string
+  @Prop({ required: false, type: String, default: '' })
+  imageUrl: string
 }
 
 export const DishSchema = SchemaFactory.createForClass(Dish)

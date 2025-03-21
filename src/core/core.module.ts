@@ -1,7 +1,7 @@
 import { Module, ValidationPipe } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import Joi from 'joi'
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { MongooseModule } from '@nestjs/mongoose'
 import { client, database, environment, port, server, token, upload } from 'config'
 import { TransformResponseInterceptor } from 'core/interceptors/transform-response.interceptor'
@@ -10,6 +10,8 @@ import { CaslModule } from './casl/casl.module'
 import { extractErrorMessageFromDto } from 'core/utils/utils'
 import { JwtEmployeeAuthGuard } from 'core/guards/jwt-employee-auth.guard'
 import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
+import AnyExceptionFilter from 'core/exceptions/any-exception-filter'
+import { RolesGuard } from 'core/guards/roles.guard'
 
 @Module({
   imports: [
@@ -31,7 +33,10 @@ import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
         CUSTOMER_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         CUSTOMER_ACCESS_TOKEN_SECRET: Joi.string().required(),
         CUSTOMER_REFRESH_TOKEN_SECRET: Joi.string().required(),
-        SERVER_BASE_URL: Joi.string().required()
+        SERVER_BASE_URL: Joi.string().required(),
+        CLOUDINARY_API_KEY: Joi.string().required(),
+        CLOUDINARY_API_SECRET: Joi.string().required(),
+        CLOUDINARY_CLOUD_NAME: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({
@@ -47,10 +52,10 @@ import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
       provide: APP_GUARD,
       useClass: JwtEmployeeAuthGuard
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RolesGuard
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformResponseInterceptor
@@ -72,15 +77,15 @@ import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
           )
         }
       })
-    }
+    },
     // {
     //   provide: APP_FILTER,
     //   useClass: HttpExceptionFilter
     // },
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: AnyExceptionFilter
-    // }
+    {
+      provide: APP_FILTER,
+      useClass: AnyExceptionFilter
+    }
   ],
   exports: []
 })

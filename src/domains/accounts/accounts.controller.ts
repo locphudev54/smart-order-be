@@ -6,35 +6,43 @@ import { AccountQueryDto } from 'domains/accounts/dto/account-query.dto'
 import { AccountsService } from './accounts.service'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
+import { Public } from 'core/decorators/public.decorator'
+import { Roles } from 'core/decorators/roles.decorator'
+import { Role } from 'core/constants/enum'
 @Controller('accounts')
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
   @Post()
+  @Roles(Role.Manager)
   @ResponseMessage('Tạo tài khoản thành công')
   create(@Body() createAccountDto: CreateAccountDto) {
     return this.accountsService.create(createAccountDto)
   }
 
   @Get()
+  @Roles(Role.Manager)
   @ResponseMessage('Lấy danh sách tài khoản thành công')
   findAll(@Query() paginationQuery: PaginationQueryDto, @Query() tableQuery: AccountQueryDto) {
     return this.accountsService.findAll({ ...paginationQuery, ...tableQuery })
   }
 
   @Get(':id')
+  @Roles(Role.Manager)
   @ResponseMessage('Lấy thông tin tài khoản thành công')
   findOne(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.accountsService.findOne(id)
   }
 
   @Patch(':id')
+  @Roles(Role.Manager)
   @ResponseMessage('Cập nhật tài khoản thành công')
   update(@Param('id', ValidateMongoIdPipe) id: string, @Body() updateAccountDto: UpdateAccountDto) {
     return this.accountsService.update(id, updateAccountDto)
   }
 
   @Delete(':id')
+  @Roles(Role.Manager)
   @ResponseMessage('Xóa tài khoản thành công')
   remove(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.accountsService.remove(id)

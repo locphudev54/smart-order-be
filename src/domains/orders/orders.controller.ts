@@ -9,12 +9,15 @@ import { UpdateOrderDto } from './dto/update-order.dto'
 import { OrdersService } from './orders.service'
 import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
 import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
+import { Roles } from 'core/decorators/roles.decorator'
+import { Role } from 'core/constants/enum'
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @Roles([Role.Manager, Role.Waiter])
   @ResponseMessage('Tạo đơn hàng thành công')
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto)
@@ -43,11 +46,13 @@ export class OrdersController {
   }
 
   @Delete('bulk-delete')
+  @Roles([Role.Manager, Role.Waiter])
   removeBulk(@Body() body: DeleteBulkDto) {
     return this.ordersService.removeBulk(body)
   }
 
   @Delete(':id')
+  @Roles([Role.Manager, Role.Waiter])
   @ResponseMessage('Xoá đơn hàng thành công')
   remove(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.ordersService.remove(id)

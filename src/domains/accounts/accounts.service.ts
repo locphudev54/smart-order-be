@@ -5,7 +5,7 @@ import { NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { AccountQueryDto } from 'domains/accounts/dto/account-query.dto'
 import { Account, AccountDocument } from 'domains/accounts/schemas/account.schema'
-import mongoose, { Model } from 'mongoose'
+import { Model } from 'mongoose'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
 
@@ -24,7 +24,7 @@ export class AccountsService {
     const newAccount = await this.accountModel.create({
       ...createAccountDto,
       password: hashedPassword,
-      _id: createAccountDto._id ?? new mongoose.Types.ObjectId()
+      _id: createAccountDto._id
     })
 
     return {

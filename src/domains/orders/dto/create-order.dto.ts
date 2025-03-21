@@ -1,6 +1,5 @@
-import { Transform, Type } from 'class-transformer'
-import { ArrayMinSize, IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator'
-import { OrderStatus } from 'core/constants/enum'
+import { Type } from 'class-transformer'
+import { ArrayMinSize, IsArray, IsInt, IsNotEmpty, ValidateNested } from 'class-validator'
 import { OrderItemDto } from 'domains/orders/dto/order-item.dto'
 
 export class CreateOrderDto {

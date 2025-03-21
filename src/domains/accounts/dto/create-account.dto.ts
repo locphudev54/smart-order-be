@@ -35,27 +35,11 @@ export class CreateAccountDto {
   @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
   @IsOptional() // Tác dụng khi gọi API
   @Transform(({ value }) => String(value).trim())
-  avatarUrl?: string // ? Tác dụng cho TS check
-
-  // NOTE: VALIDATE ARRAY OF ENUM
-  // @ArrayUnique({ message: 'Các giá trị trong role phải khác nhau' })
-  // @IsEnum(Role, {
-  //   each: true,
-  //   message: `role phải chỉ gồm một trong những giá trị sau: ${Role.Chef} || ${Role.Manager} || ${Role.Waiter}`
-  // })
-  // @ArrayMinSize(1, { message: 'role phải có ít nhất một vai trò' })
-  // @IsArray({ message: 'role phải là một mảng các vai trò' })
-  // @IsOptional()
-  // role?: Role
+  avatarUrl?: string // ? Tác dụng cho DEV nhận biết
 
   @IsEnum(Role, {
     message: `role phải là một trong những giá trị sau: ${Role.Chef} || ${Role.Manager} || ${Role.Manager}`
   })
   @IsOptional()
   role?: Role
-
-  @IsString({ message: 'refreshToken phải là kiểu dữ liệu là string' })
-  @IsOptional()
-  @Transform(({ value }) => String(value).trim())
-  refreshToken?: string
 }

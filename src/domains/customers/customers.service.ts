@@ -37,7 +37,7 @@ export class CustomersService {
     // const { tableNumber } = createCustomerDto
     // const table = await this.tablesService.findByTableNumber(tableNumber)
 
-    if (table.status !== TableStatus.Available) {
+    if (table.status !== TableStatus.Available || table.customer) {
       throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
     const customerCode = generateCustomerCode()
@@ -92,7 +92,7 @@ export class CustomersService {
       throw new BadRequestError('Bàn không tồn tại')
     }
 
-    if (table.status !== TableStatus.Available) {
+    if (table.status !== TableStatus.Available || table.customer) {
       throw new BadRequestError('Bàn này đã được đặt trước hoặc đang có khách sử dụng')
     }
 

@@ -9,12 +9,16 @@ export default class AnyExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>()
     const statusCode = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR
 
-    response.status(statusCode).json({
-      timestamp: new Date().toISOString(),
-      instance: request.url,
-      title: 'Internal Server Error',
-      statusCode,
-      message: 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.'
-    })
+    if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR) {
+      response.status(statusCode).json({
+        timestamp: new Date().toISOString(),
+        instance: request.url,
+        title: 'Internal Server Error',
+        statusCode,
+        message: (exception as any).message ?? 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.'
+      })
+    } else {
+      response.status(statusCode).json((exception as HttpException).getResponse())
+    }
   }
 }

@@ -1,17 +1,5 @@
 import { Transform, Type } from 'class-transformer'
-import {
-  ArrayMinSize,
-  IsArray,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-  MinLength,
-  ValidationArguments,
-  ValidatorConstraint,
-  ValidatorConstraintInterface
-} from 'class-validator'
+import { ArrayMinSize, IsEnum, IsInt, IsOptional, IsPositive, IsString, MinLength } from 'class-validator'
 import { OrderStatus } from 'core/constants/enum'
 import { IsUniqueArray } from 'core/decorators/is-unique-array.decorator'
 

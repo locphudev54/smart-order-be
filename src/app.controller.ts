@@ -12,8 +12,6 @@ import { Dish } from 'domains/dishes/schemas/dish.schema'
 export class AppController {
   constructor() {}
 
-  // @Roles(Role.Manager, Role.Chef)
-  // @Public()
   @Get()
   @ResponseMessage('Test response message decorator')
   getHello() {

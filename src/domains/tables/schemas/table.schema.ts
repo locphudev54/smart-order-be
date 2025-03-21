@@ -7,23 +7,23 @@ export type TableDocument = HydratedDocument<Table>
 
 @Schema({ timestamps: true, versionKey: false, collection: 'Tables' })
 export class Table {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, type: Number })
   number: number
 
-  @Prop({ required: true })
-  capacity: number
+  // @Prop({ required: true, type: Number })
+  // capacity: number
 
   // NOTE: Schema Prop: Enum
-  @Prop({ type: String, enum: TableStatus, default: TableStatus.Available })
+  @Prop({ required: false, type: String, enum: TableStatus, default: TableStatus.Available })
   status: TableStatus
 
   @Prop({ required: false, type: mongoose.Schema.Types.ObjectId, ref: 'Customer', default: null })
   customer: CustomerDocument
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, type: String })
   reservationLink: string
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, type: String })
   token: string
 }
 

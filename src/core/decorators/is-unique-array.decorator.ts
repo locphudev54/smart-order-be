@@ -3,7 +3,7 @@ import { IsUniqueArrayConstraint } from 'core/validators/is-unique-array.validat
 import { ValidationOptions } from 'joi'
 
 export function IsUniqueArray(message?: string, validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName,

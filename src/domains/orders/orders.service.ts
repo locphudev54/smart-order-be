@@ -7,13 +7,12 @@ import { generateOrderCode } from 'core/utils/utils'
 import { CustomersService } from 'domains/customers/customers.service'
 import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
 import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
+import { OrdersGateway } from 'domains/orders/orders.gateway'
 import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
 import { TablesService } from 'domains/tables/tables.service'
 import { FilterQuery, Model } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
-import { OrdersGateway } from 'domains/orders/orders.gateway'
-import moment from 'moment-timezone'
 
 @Injectable()
 export class OrdersService {
