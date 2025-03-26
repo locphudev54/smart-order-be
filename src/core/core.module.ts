@@ -12,9 +12,34 @@ import { JwtEmployeeAuthGuard } from 'core/guards/jwt-employee-auth.guard'
 import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
 import AnyExceptionFilter from 'core/exceptions/any-exception-filter'
 import { RolesGuard } from 'core/guards/roles.guard'
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
+import { ApiKeyGuard } from 'core/guards/api-key.guard'
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 1000,
+          limit: 2
+        }
+        // {
+        //   name: 'short',
+        //   ttl: 1000,
+        //   limit: 2
+        // },
+        // {
+        //   name: 'medium',
+        //   ttl: 10000,
+        //   limit: 20
+        // },
+        // {
+        //   name: 'long',
+        //   ttl: 60000,
+        //   limit: 100
+        // }
+      ]
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [environment, port, database, token, upload, client, server],
@@ -36,7 +61,9 @@ import { RolesGuard } from 'core/guards/roles.guard'
         SERVER_BASE_URL: Joi.string().required(),
         CLOUDINARY_API_KEY: Joi.string().required(),
         CLOUDINARY_API_SECRET: Joi.string().required(),
-        CLOUDINARY_CLOUD_NAME: Joi.string().required()
+        CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+        LOGIN_PRIVATE_KEY: Joi.string().required(),
+        API_KEY: Joi.string().required()
       })
     }),
     MongooseModule.forRootAsync({
@@ -48,6 +75,8 @@ import { RolesGuard } from 'core/guards/roles.guard'
     CaslModule
   ],
   providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: ApiKeyGuard },
     {
       provide: APP_GUARD,
       useClass: JwtEmployeeAuthGuard

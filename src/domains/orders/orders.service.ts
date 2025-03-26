@@ -13,15 +13,20 @@ import { TablesService } from 'domains/tables/tables.service'
 import { FilterQuery, Model } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
+import { OrderStatus, TableStatus } from 'core/constants/enum'
+import { endOfToday, startOfToday } from 'date-fns'
+import { AccountType } from 'core/types/type'
+import { BillsService } from 'domains/bills/bills.service'
 
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    @InjectModel(Order.name) private orderModel: Model<Order>,
     @Inject(forwardRef(() => CustomersService))
     private readonly customersService: CustomersService,
     private readonly tablesService: TablesService,
-    private readonly ordersGateway: OrdersGateway
+    private readonly ordersGateway: OrdersGateway,
+    private readonly billsService: BillsService
   ) {}
 
   async create(createOrderDto: CreateOrderDto, fromCustomer?: boolean) {
@@ -168,6 +173,43 @@ export class OrdersService {
     }
   }
 
+  async getStatisticsByTables() {
+    const tableQuery = await this.tablesService.findAll({})
+    const tableNumbers = tableQuery.data.map((table) => table.number)
+    const orderStatuses = Object.values(OrderStatus)
+
+    const from = startOfToday()
+    const to = endOfToday()
+    const orderQuery = await this.findAll({ from, to })
+
+    const statisticsResult = tableNumbers.map((tableNumber) => ({
+      tableNumber,
+      orders: [] as Order[],
+      statusCounts: orderStatuses.reduce(
+        (acc, status) => {
+          acc[status] = 0
+          return acc
+        },
+        {} as Record<OrderStatus, number>
+      )
+    }))
+
+    const tablesHasCustomer = tableQuery.data.filter((table) => table.customer && table.status === TableStatus.Occupied)
+    const customerIds = tablesHasCustomer.map((table) => table.customer.id)
+    const currentOrdersInTables = orderQuery.data.filter((order) => customerIds.includes(order.customer.id))
+
+    currentOrdersInTables.forEach((order) => {
+      statisticsResult.forEach((summary) => {
+        if (summary.tableNumber === order.tableNumber) {
+          summary.statusCounts[order.status] += 1
+          summary.orders.push(order)
+        }
+      })
+    })
+
+    return statisticsResult
+  }
+
   async findOne(id: string) {
     const order = await this.orderModel
       .findOne({ _id: id })
@@ -183,13 +225,6 @@ export class OrdersService {
     if (!order) {
       throw new NotFoundError('Đơn hàng không tồn tại')
     }
-
-    // TODO:  Hiện Toast để người dùng cập nhật lại thành bàn trống khi mà trạng thái mới là Canceled, Paid,...
-    // if ([OrderStatus.Paid, OrderStatus.Canceled].includes(updateOrderDto.status)) {
-    //   await this.tablesService.update(order.table.id, { status: TableStatus.Available, customer: null })
-    // } else {
-    //   await this.tablesService.update(order.table.id, { status: TableStatus.Occupied, customer: order.customer._id })
-    // }
 
     const customerCode = order.customer.code
     const dishTitle = order.dish.title
@@ -212,5 +247,26 @@ export class OrdersService {
 
   async removeBulk(ids: DeleteBulkDto) {
     return this.orderModel.deleteMany({ _id: ids })
+  }
+
+  async checkout(customerId: string, account: AccountType) {
+    const [customer] = await Promise.all([
+      this.customersService.findOne(customerId),
+      this.orderModel.updateMany(
+        { customer: customerId, status: { $nin: [OrderStatus.Rejected, OrderStatus.Canceled] } },
+        { status: OrderStatus.Paid }
+      ),
+      this.customersService.updateRefreshToken(customerId, '')
+    ])
+
+    const customerCode = customer.code
+    const { tableNumber } = customer
+
+    const [invoice] = await Promise.all([
+      this.billsService.create({ customerCode }, account),
+      this.tablesService.updateByNumber(tableNumber, { customer: null, status: TableStatus.Available })
+    ])
+    this.ordersGateway.emitLogout(customerId)
+    return invoice
   }
 }

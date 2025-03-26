@@ -36,3 +36,8 @@ export const generateCustomerCode = () => {
   const nanoid = customAlphabet('0123456789', 6)()
   return `CUS${nanoid}`
 }
+
+export const generateBillCode = () => {
+  const nanoid = customAlphabet('0123456789', 6)()
+  return `INV${nanoid}`
+}

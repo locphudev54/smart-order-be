@@ -11,6 +11,8 @@ import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
 import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
 import { Roles } from 'core/decorators/roles.decorator'
 import { Role } from 'core/constants/enum'
+import { AccountType } from 'core/types/type'
+import { Account } from 'core/decorators/account.decorator'
 
 @Controller('orders')
 export class OrdersController {
@@ -31,6 +33,12 @@ export class OrdersController {
     @Query() orderQuery: OrderQueryDto
   ) {
     return this.ordersService.findAll({ ...paginationQuery, ...dateRangeQuery, ...orderQuery })
+  }
+
+  @Get('statistics-by-tables')
+  @ResponseMessage('Lấy danh sách thống kê đơn hàng theo từng bàn thành công')
+  findByTables() {
+    return this.ordersService.getStatisticsByTables()
   }
 
   @Get(':id')
@@ -56,5 +64,13 @@ export class OrdersController {
   @ResponseMessage('Xoá đơn hàng thành công')
   remove(@Param('id', ValidateMongoIdPipe) id: string) {
     return this.ordersService.remove(id)
+  }
+
+  @Roles([Role.Manager, Role.Waiter])
+  @Get('checkout/:customerId')
+  @Roles([Role.Manager, Role.Waiter])
+  @ResponseMessage('Thanh toán đơn hàng cho khách thành công')
+  checkout(@Param('customerId', ValidateMongoIdPipe) customerId: string, @Account() account: AccountType) {
+    return this.ordersService.checkout(customerId, account)
   }
 }

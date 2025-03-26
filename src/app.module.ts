@@ -11,6 +11,8 @@ import { DishesModule } from './domains/dishes/dishes.module'
 import { MediaModule } from './domains/media/media.module'
 import { OrdersModule } from './domains/orders/orders.module'
 import { TablesModule } from './domains/tables/tables.module'
+import { ThrottlerModule } from '@nestjs/throttler'
+import { BillsModule } from 'domains/bills/bills.module'
 @Module({
   imports: [
     CoreModule,
@@ -21,7 +23,8 @@ import { TablesModule } from './domains/tables/tables.module'
     OrdersModule,
     TablesModule,
     CustomersModule,
-    CloudinaryModule
+    CloudinaryModule,
+    BillsModule
   ],
   controllers: [AppController],
   providers: [AppService, CaslAbilityFactory]

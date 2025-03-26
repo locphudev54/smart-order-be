@@ -6,16 +6,15 @@ import helmet from 'helmet'
 import path from 'path'
 import cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
-import moment from 'moment-timezone'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   app.use(helmet())
 
-  console.log(moment.tz(Date.now(), 'Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm:ss.SSSZ'))
-
   const configService = app.get(ConfigService)
+
   const port = configService.get<number>('port')
 
   app.enableVersioning({
@@ -36,6 +35,17 @@ async function bootstrap() {
   app.enableCors({ origin: '*' })
 
   app.use(cookieParser())
+
+  const config = new DocumentBuilder()
+    .setTitle('Smart Order')
+    .setDescription('The Smart Order API description')
+    .setVersion('1.0')
+    .addTag('Pham Phu Loc')
+    .build()
+  const documentFactory = () => SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('docs', app, documentFactory, {
+    jsonDocumentUrl: 'docs/json'
+  })
 
   await app.listen(port)
 }

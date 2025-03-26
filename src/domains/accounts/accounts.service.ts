@@ -1,18 +1,25 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import * as bcrypt from 'bcrypt'
-import { NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.exception'
+import { BadRequestError, NotFoundError, UnprocessableEntityError } from 'core/exceptions/errors.exception'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { AccountQueryDto } from 'domains/accounts/dto/account-query.dto'
 import { Account, AccountDocument } from 'domains/accounts/schemas/account.schema'
 import { Model } from 'mongoose'
 import { CreateAccountDto } from './dto/create-account.dto'
 import { UpdateAccountDto } from './dto/update-account.dto'
+import crypto from 'crypto'
+import { ConfigService } from '@nestjs/config'
+import * as fs from 'fs'
+import path from 'path'
 
 @Injectable()
 export class AccountsService {
   private saltRounds = 10
-  constructor(@InjectModel(Account.name) private accountModel: Model<AccountDocument>) {}
+  constructor(
+    @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
+    private readonly configService: ConfigService
+  ) {}
 
   async create(createAccountDto: CreateAccountDto & { _id?: string }) {
     const isExistAccount = await this.accountModel.findOne({ email: createAccountDto.email })
@@ -83,7 +90,9 @@ export class AccountsService {
     const account = await this.findByEmail(email)
     if (!account) return null
 
-    const isMatchPassword = await this.comparePassword(password, account.password)
+    const decryptedPassword = this.decryptPassword(password)
+    const isMatchPassword = await this.comparePassword(decryptedPassword, account.password)
+
     return isMatchPassword ? account : null
   }
 
@@ -129,5 +138,30 @@ export class AccountsService {
    */
   comparePassword(password: string, hashedPassword: string) {
     return bcrypt.compare(password, hashedPassword)
+  }
+
+  decryptPassword(encryptedPassword: string): string | null {
+    try {
+      const privateKey = fs.readFileSync(path.join(process.cwd(), 'src/config/private-key.pem'))
+
+      const password = crypto
+        .privateDecrypt(
+          {
+            key: privateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha1'
+          },
+          Buffer.from(encryptedPassword, 'base64')
+        )
+        .toString()
+
+      if (!password) {
+        throw new BadRequestError('Giải mã password thất bại')
+      }
+
+      return password
+    } catch (error: any) {
+      throw new BadRequestError(error.message ?? 'Giải mã password thất bại')
+    }
   }
 }

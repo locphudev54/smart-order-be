@@ -50,7 +50,7 @@ export class TablesService {
     //   filter.customer = customerId
     // }
 
-    const query = this.tableModel.find(filter)
+    const query = this.tableModel.find(filter).populate({ path: 'customer', select: ['_id', 'code'] })
 
     if (limit && page) {
       query
@@ -138,6 +138,11 @@ export class TablesService {
       this.customersService.removeRefreshToken(customerId.toString())
     }
     return this.tableModel.findOneAndUpdate({ _id: id }, updateTableDto, { returnOriginal: false })
+  }
+
+  async updateByNumber(tableNumber: number, updateTableDto: UpdateTableDto) {
+    const table = await this.tableModel.findOne({ number: tableNumber })
+    return this.update(table._id.toString(), updateTableDto)
   }
 
   async remove(id: string) {

@@ -19,7 +19,7 @@ const EMPLOYEE_ROOM = 'employeeRoom'
   cors: { origin: '*' },
   transports: ['websocket', 'polling']
 })
-export class OrdersGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService
@@ -28,9 +28,9 @@ export class OrdersGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @WebSocketServer()
   server: Server
 
-  afterInit(server: Server) {
-    console.log('OrdersGateway initialized')
-  }
+  // afterInit(server: Server) {
+  //   console.log('OrdersGateway initialized')
+  // }
 
   async handleConnection(client: Socket) {
     console.log('⚡Connecting...', client.id)
@@ -85,8 +85,14 @@ export class OrdersGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async emitUpdateOrder(customerCode: string, updateInfo: { dishTitle: string; status: OrderStatus }) {
     const sockets = await this.server.fetchSockets()
-    const socketId = sockets.find((socket) => (socket.data as any).code === customerCode)?.id
+    const socketId = sockets.find((socket) => (socket.data as CustomerTokenPayload).code === customerCode)?.id
     if (socketId) this.server.to(socketId).emit('updatedOrder', updateInfo)
+  }
+
+  async emitLogout(customerId: string) {
+    const sockets = await this.server.fetchSockets()
+    const socketId = sockets.find((socket) => (socket.data as CustomerTokenPayload)._id === customerId)?.id
+    if (socketId) this.server.to(socketId).emit('logout')
   }
 
   // ---------------------------- Listen event from client and proccess ----------------------------

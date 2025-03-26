@@ -23,7 +23,6 @@ import { LogoutDto } from 'domains/customers/dto/logout.dto'
 export class CustomersService {
   constructor(
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
-    // @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -125,10 +124,8 @@ export class CustomersService {
     const table = await this.tablesService.findByTableNumber(customer.tableNumber)
     const tableId = table._id.toString()
 
-    Promise.all([
-      this.customerModel.updateOne({ refreshToken }, { refreshToken: '' }),
-      this.tablesService.update(tableId, { status: TableStatus.Available, customer: null })
-    ])
+    this.customerModel.updateOne({ refreshToken }, { refreshToken: '' })
+    this.tablesService.update(tableId, { status: TableStatus.Available, customer: null })
   }
 
   async refreshToken(refreshTokenDto: RefreshTokenDto) {
@@ -188,5 +185,9 @@ export class CustomersService {
       secret: this.configService.get<string>('customerRefreshToken.secret'),
       expiresIn: ms(this.configService.get<StringValue>('customerRefreshToken.expiresIn')) / 1000
     })
+  }
+
+  async updateRefreshToken(id: string, refreshToken: string) {
+    return this.customerModel.updateOne({ _id: id }, { refreshToken })
   }
 }
