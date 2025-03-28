@@ -1,18 +1,19 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { OrderStatus } from 'core/constants/enum'
+import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { AccountType } from 'core/types/type'
 import { generateBillCode } from 'core/utils/utils'
 import { CreateBillDto } from 'domains/bills/dtos/create-bill.dto'
-import { Bill } from 'domains/bills/schemas/bill.schema'
+import { Bill, BillDocument } from 'domains/bills/schemas/bill.schema'
 import { OrdersService } from 'domains/orders/orders.service'
-import { Model } from 'mongoose'
+import { FilterQuery, Model } from 'mongoose'
 
 @Injectable()
 export class BillsService {
   constructor(
-    @InjectModel(Bill.name) private readonly invoiceModel: Model<Bill>,
+    @InjectModel(Bill.name) private readonly billModel: Model<Bill>,
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService
   ) {}
@@ -32,10 +33,10 @@ export class BillsService {
       }
     })
 
-    const invoiceCode = generateBillCode()
+    const billCode = generateBillCode()
     const { tableNumber } = orderQuery.data[0]
-    return this.invoiceModel.create({
-      invoiceCode,
+    return this.billModel.create({
+      billCode,
       orderItems,
       customerCode,
       totalPrice,
@@ -44,9 +45,18 @@ export class BillsService {
     })
   }
 
-  async findAll(qs: PaginationQueryDto) {
-    const { page, limit, ...filter } = qs
-    const query = this.invoiceModel
+  async findAll(qs: PaginationQueryDto & DateRangeQueryDto) {
+    const { page, limit, from, to } = qs
+
+    const filter: FilterQuery<BillDocument> = {}
+
+    if (from || to) {
+      filter.createdAt = {}
+      if (from) filter.createdAt.$gte = from
+      if (to) filter.createdAt.$lt = to
+    }
+
+    const query = this.billModel
       .find(filter)
       .populate([{ path: 'orderItems.dish' }, { path: 'account', select: ['fullName', 'email', 'role'] }])
 
@@ -57,7 +67,7 @@ export class BillsService {
         .sort('-createdAt')
     }
 
-    const [data, totalDocuments] = await Promise.all([query, this.invoiceModel.countDocuments(filter)])
+    const [data, totalDocuments] = await Promise.all([query, this.billModel.countDocuments(filter)])
 
     return {
       data,

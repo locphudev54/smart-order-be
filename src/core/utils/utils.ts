@@ -39,5 +39,5 @@ export const generateCustomerCode = () => {
 
 export const generateBillCode = () => {
   const nanoid = customAlphabet('0123456789', 6)()
-  return `INV${nanoid}`
+  return `BILL${nanoid}`
 }

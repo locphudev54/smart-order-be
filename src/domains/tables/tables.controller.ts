@@ -21,7 +21,6 @@ export class TablesController {
   }
 
   @Get()
-  @Roles([Role.Manager, Role.Waiter])
   @ResponseMessage('Lấy danh sách bàn thành công')
   findAll(@Query() paginationQuery: PaginationQueryDto, @Query() tableQuery: TableQueryDto) {
     return this.tablesService.findAll({ ...paginationQuery, ...tableQuery })

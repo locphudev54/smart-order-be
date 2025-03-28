@@ -9,6 +9,7 @@ import { UpdateAccountDto } from './dto/update-account.dto'
 import { Public } from 'core/decorators/public.decorator'
 import { Roles } from 'core/decorators/roles.decorator'
 import { Role } from 'core/constants/enum'
+import { ApiBody } from '@nestjs/swagger'
 @Controller('accounts')
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}

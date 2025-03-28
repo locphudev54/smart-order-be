@@ -87,6 +87,7 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const sockets = await this.server.fetchSockets()
     const socketId = sockets.find((socket) => (socket.data as CustomerTokenPayload).code === customerCode)?.id
     if (socketId) this.server.to(socketId).emit('updatedOrder', updateInfo)
+    this.server.in(EMPLOYEE_ROOM).emit('updatedOrder', updateInfo)
   }
 
   async emitLogout(customerId: string) {

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Res, Req } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Request, Get, Res, Req, Query } from '@nestjs/common'
 import { CustomersService } from './customers.service'
 import { Public } from 'core/decorators/public.decorator'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
@@ -11,6 +11,9 @@ import { JwtCustomerAuthGuard } from 'core/guards/jwt-customer-auth.guard'
 import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-customer.dto'
 import { Request as RequestType, Response } from 'express'
 import { LogoutDto } from 'domains/customers/dto/logout.dto'
+import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
+import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
@@ -38,6 +41,12 @@ export class CustomersController {
   @ResponseMessage('Lấy thông tin khách hàng thành công')
   me(@Customer() customer: CustomerType) {
     return this.customersService.findOne(customer._id)
+  }
+
+  @Get()
+  @ResponseMessage('Lấy danh sách khách hàng thành công')
+  findAll(@Query() paginationQuery: PaginationQueryDto, @Query(ValidateDateRange) dateRangeQuery: DateRangeQueryDto) {
+    return this.customersService.findAll({ ...paginationQuery, ...dateRangeQuery })
   }
 
   // ------------------------------- CUSTOMER'S AUTH ROUTES -------------------------------

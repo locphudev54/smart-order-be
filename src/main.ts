@@ -2,11 +2,11 @@ import { VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
-import helmet from 'helmet'
 import path from 'path'
 import cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import helmet from 'helmet'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
@@ -38,14 +38,15 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Smart Order')
-    .setDescription('The Smart Order API description')
+    .setDescription('SOA Spring, 2025 - TDTU')
     .setVersion('1.0')
-    .addTag('Pham Phu Loc')
     .build()
   const documentFactory = () => SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('docs', app, documentFactory, {
     jsonDocumentUrl: 'docs/json'
   })
+
+  app.use(helmet())
 
   await app.listen(port)
 }

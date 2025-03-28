@@ -54,7 +54,6 @@ export class OrdersController {
   }
 
   @Delete('bulk-delete')
-  @Roles([Role.Manager, Role.Waiter])
   removeBulk(@Body() body: DeleteBulkDto) {
     return this.ordersService.removeBulk(body)
   }
@@ -66,7 +65,6 @@ export class OrdersController {
     return this.ordersService.remove(id)
   }
 
-  @Roles([Role.Manager, Role.Waiter])
   @Get('checkout/:customerId')
   @Roles([Role.Manager, Role.Waiter])
   @ResponseMessage('Thanh toán đơn hàng cho khách thành công')

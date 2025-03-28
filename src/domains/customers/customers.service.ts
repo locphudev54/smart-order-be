@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/commo
 import { CreateCustomerDto } from './dto/create-customer.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Customer, CustomerDocument } from 'domains/customers/schemas/customer.schema'
-import { Model, Types } from 'mongoose'
+import { FilterQuery, Model, Types } from 'mongoose'
 import { JwtService, TokenExpiredError } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { CustomerTokenPayload, CustomerType, TableTokenPayload } from 'core/types/type'
@@ -18,6 +18,8 @@ import { CreateOrderByCustomerDto } from 'domains/customers/dto/create-order-by-
 import { TableDocument } from 'domains/tables/schemas/table.schema'
 import { Request, Response } from 'express'
 import { LogoutDto } from 'domains/customers/dto/logout.dto'
+import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 
 @Injectable()
 export class CustomersService {
@@ -49,6 +51,38 @@ export class CustomersService {
   createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType) {
     const { items } = createOrderDto
     return this.ordersService.create({ tableNumber: customer.tableNumber, items }, true)
+  }
+
+  async findAll(qs: PaginationQueryDto & DateRangeQueryDto) {
+    const { page, limit, from, to } = qs
+    const filter: FilterQuery<CustomerDocument> = {}
+
+    if (from || to) {
+      filter.createdAt = {}
+      if (from) filter.createdAt.$gte = from
+      if (to) filter.createdAt.$lt = to
+    }
+
+    const query = this.customerModel.find(filter)
+
+    if (limit && page) {
+      query
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort('createdAt')
+    }
+
+    const [data, totalDocuments] = await Promise.all([query, this.customerModel.countDocuments(filter)])
+
+    return {
+      data,
+      meta: {
+        page: page || 1,
+        limit: limit || totalDocuments,
+        totalPages: limit ? Math.ceil(totalDocuments / limit) : 1,
+        totalDocuments
+      }
+    }
   }
 
   async findOrders(customer: CustomerType) {

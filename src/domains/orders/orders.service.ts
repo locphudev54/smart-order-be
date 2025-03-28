@@ -262,11 +262,11 @@ export class OrdersService {
     const customerCode = customer.code
     const { tableNumber } = customer
 
-    const [invoice] = await Promise.all([
+    const [bill] = await Promise.all([
       this.billsService.create({ customerCode }, account),
       this.tablesService.updateByNumber(tableNumber, { customer: null, status: TableStatus.Available })
     ])
     this.ordersGateway.emitLogout(customerId)
-    return invoice
+    return bill
   }
 }
