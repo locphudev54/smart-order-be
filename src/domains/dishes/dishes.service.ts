@@ -4,9 +4,10 @@ import { NotFoundError } from 'core/exceptions/errors.exception'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { DishQueryDto } from 'domains/dishes/dto/dish-query.dto'
 import { Dish, DishDocument } from 'domains/dishes/schemas/dish.schema'
-import { Model } from 'mongoose'
+import { FilterQuery, Model } from 'mongoose'
 import { CreateDishDto } from './dto/create-dish.dto'
 import { UpdateDishDto } from './dto/update-dish.dto'
+import { Category, CategoryDocument } from 'domains/categories/schemas/category.schema'
 
 @Injectable()
 export class DishesService {
@@ -17,11 +18,17 @@ export class DishesService {
   }
 
   async findAll(qs: PaginationQueryDto & DishQueryDto) {
-    const { page, limit, sort: sortQuery, ...filter } = qs
-    const sortField = sortQuery?.split('.')?.[0]
-    const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
+    const { page, limit, sort: sortQuery } = qs
+    const filter: FilterQuery<Category> = {}
 
-    const query = this.dishModel.find(filter)
+    let sort = '-createdAt'
+    if (sortQuery) {
+      const sortField = sortQuery.split('.')[0]
+      const isDescending = sortQuery.split('.')[1] === 'desc'
+      sort = isDescending ? `-${sortField}` : sortField
+    }
+
+    const query = this.dishModel.find(filter).populate([{ path: 'category', select: ['_id', 'title'] }])
 
     if (limit && page) {
       query

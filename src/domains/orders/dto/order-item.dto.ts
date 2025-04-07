@@ -19,7 +19,7 @@ export class OrderItemDto {
   @IsNotEmpty({ message: 'price không được bỏ trống' })
   price: number
 
-  @MaxLength(100, { message: 'note không được vượt quá 100 kí tự' })
+  @MaxLength(40, { message: 'note không được vượt quá 40 kí tự' })
   @IsString({ message: 'note phải là kiểu dữ liệu là string' })
   @Transform(({ value }) => String(value).trim())
   @IsOptional()

@@ -1,9 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { OrderStatus, TableStatus } from 'core/constants/enum'
 import { NotFoundError } from 'core/exceptions/errors.exception'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { AccountType } from 'core/types/type'
 import { generateOrderCode } from 'core/utils/utils'
+import { endOfToday, startOfToday } from 'date-fns'
+import { BillsService } from 'domains/bills/bills.service'
 import { CustomersService } from 'domains/customers/customers.service'
 import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
 import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
@@ -13,10 +17,6 @@ import { TablesService } from 'domains/tables/tables.service'
 import { FilterQuery, Model } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
-import { OrderStatus, TableStatus } from 'core/constants/enum'
-import { endOfToday, startOfToday } from 'date-fns'
-import { AccountType } from 'core/types/type'
-import { BillsService } from 'domains/bills/bills.service'
 
 @Injectable()
 export class OrdersService {
@@ -226,9 +226,12 @@ export class OrdersService {
       throw new NotFoundError('Đơn hàng không tồn tại')
     }
 
+    // -------------------------- Finite State Machine --------------------------
+    const { status } = updateOrderDto
+
     const customerCode = order.customer.code
     const dishTitle = order.dish.title
-    const { status } = updateOrderDto
+
     this.ordersGateway.emitUpdateOrder(customerCode, { dishTitle, status })
     return this.orderModel.findOneAndUpdate(
       {

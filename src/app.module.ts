@@ -14,6 +14,7 @@ import { TablesModule } from './domains/tables/tables.module'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { BillsModule } from 'domains/bills/bills.module'
 import { DashboardModule } from './domains/dashboard/dashboard.module'
+import { CategoriesModule } from './domains/categories/categories.module';
 @Module({
   imports: [
     CoreModule,
@@ -26,7 +27,8 @@ import { DashboardModule } from './domains/dashboard/dashboard.module'
     CustomersModule,
     CloudinaryModule,
     BillsModule,
-    DashboardModule
+    DashboardModule,
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService, CaslAbilityFactory]

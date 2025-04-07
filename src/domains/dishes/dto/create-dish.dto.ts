@@ -1,6 +1,17 @@
 import { Transform } from 'class-transformer'
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator'
+import {
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  MinLength
+} from 'class-validator'
 import { DishStatus } from 'core/constants/enum'
+import { Types } from 'mongoose'
 
 export class CreateDishDto {
   @MaxLength(40, { message: 'title không được vượt quá 40 kí tự' })
@@ -10,8 +21,8 @@ export class CreateDishDto {
   @Transform(({ value }) => String(value).trim())
   title: string
 
+  @MaxLength(300, { message: 'title không được vượt quá 300 kí tự' })
   @IsString({ message: 'description phải là kiểu dữ liệu là string' })
-  @IsNotEmpty({ message: 'description không được  bỏ trống' })
   @Transform(({ value }) => String(value).trim())
   description: string
 
@@ -26,6 +37,10 @@ export class CreateDishDto {
   })
   @IsOptional()
   status?: DishStatus
+
+  @IsMongoId({ message: 'category phải là định dạng ObjectId' })
+  @IsNotEmpty({ message: 'category không được bỏ trống' })
+  category: Types.ObjectId
 
   @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
   @IsOptional()

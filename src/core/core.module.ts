@@ -62,7 +62,6 @@ import { ApiKeyGuard } from 'core/guards/api-key.guard'
         CLOUDINARY_API_KEY: Joi.string().required(),
         CLOUDINARY_API_SECRET: Joi.string().required(),
         CLOUDINARY_CLOUD_NAME: Joi.string().required(),
-        LOGIN_PRIVATE_KEY: Joi.string().required(),
         API_KEY: Joi.string().required()
       })
     }),

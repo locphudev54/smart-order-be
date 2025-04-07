@@ -12,10 +12,19 @@ import { Dish } from 'domains/dishes/schemas/dish.schema'
 export class AppController {
   constructor() {}
 
+  @Public()
   @Get()
-  @ResponseMessage('Test response message decorator')
-  getHello() {
+  async getHello() {
+    await new Promise((resolve) => {
+      setTimeout(() => resolve(true), 10000)
+    })
     return 'Hello world'
+  }
+
+  @Public()
+  @Get('test')
+  test() {
+    return 'Test'
   }
 
   @Get()

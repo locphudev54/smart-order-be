@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { DishStatus } from 'core/constants/enum'
-import { HydratedDocument } from 'mongoose'
+import { CategoryDocument } from 'domains/categories/schemas/category.schema'
+import mongoose, { HydratedDocument } from 'mongoose'
 
 export type DishDocument = HydratedDocument<Dish>
 
@@ -9,7 +10,7 @@ export class Dish {
   @Prop({ required: true, type: String })
   title: string
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: false, type: String, default: '' })
   description: string
 
   @Prop({ required: true, type: Number })
@@ -17,6 +18,9 @@ export class Dish {
 
   @Prop({ required: false, type: String, enum: DishStatus, default: DishStatus.Available })
   status: DishStatus
+
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
+  category: CategoryDocument
 
   @Prop({ required: false, type: String, default: '' })
   imageUrl: string
