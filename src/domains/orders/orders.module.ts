@@ -8,13 +8,15 @@ import { OrdersService } from './orders.service'
 import { OrdersGateway } from 'domains/orders/orders.gateway'
 import { JwtService } from '@nestjs/jwt'
 import { BillsModule } from 'domains/bills/bills.module'
+import { DishesModule } from 'domains/dishes/dishes.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     BillsModule,
     forwardRef(() => CustomersModule),
-    TablesModule
+    TablesModule,
+    DishesModule
   ],
   controllers: [OrdersController],
   providers: [OrdersService, JwtService, OrdersGateway],

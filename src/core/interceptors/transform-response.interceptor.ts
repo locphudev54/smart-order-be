@@ -13,13 +13,18 @@ export interface Response<T> {
 export class TransformResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
   constructor(private reflector: Reflector) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
+  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<Response<T>>> {
     const responseMessage = this.reflector.getAllAndOverride<string>(RESPONSE_MESSAGE, [
       context.getHandler(),
       context.getClass()
     ])
 
     const { statusCode } = context.switchToHttp().getResponse()
+    // await new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     resolve(true)
+    //   }, 3000)
+    // })
 
     return next.handle().pipe(
       map((response) => {

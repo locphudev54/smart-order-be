@@ -67,6 +67,7 @@ export class CustomersController {
 
   @CustomerRoute()
   @Post('auth/logout')
+  @UseGuards(LocalCustomerAuthGuard)
   @ResponseMessage('Đăng xuất thành công')
   logout(@Body() logoutDto: LogoutDto) {
     return this.customersService.logout(logoutDto)

@@ -20,10 +20,15 @@ export class BillsService {
 
   async create(createBillDto: CreateBillDto, account: AccountType) {
     const { customerCode } = createBillDto
-    const orderQuery = await this.ordersService.findAll({ customerCode, status: [OrderStatus.Paid] })
+    const orderPaidQuery = await this.ordersService.findAll({ customerCode, status: [OrderStatus.Paid] })
+
+    // Không có đơn hàng nào đã được thanh toán -> Không cần tạo hóa đơn làm gì
+    if (orderPaidQuery.data.length === 0) {
+      return
+    }
 
     let totalPrice = 0
-    const orderItems = orderQuery.data.map((order) => {
+    const orderItems = orderPaidQuery.data.map((order) => {
       const { dish, quantity, price } = order
       totalPrice += quantity * price
       return {
@@ -34,7 +39,7 @@ export class BillsService {
     })
 
     const billCode = generateBillCode()
-    const { tableNumber } = orderQuery.data[0]
+    const { tableNumber } = orderPaidQuery.data[0]
     return this.billModel.create({
       billCode,
       orderItems,

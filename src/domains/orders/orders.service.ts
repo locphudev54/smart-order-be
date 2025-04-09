@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { OrderStatus, TableStatus } from 'core/constants/enum'
-import { NotFoundError } from 'core/exceptions/errors.exception'
+import { DishStatus, OrderStatus, TableStatus } from 'core/constants/enum'
+import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 import { AccountType } from 'core/types/type'
@@ -17,6 +17,8 @@ import { TablesService } from 'domains/tables/tables.service'
 import { FilterQuery, Model } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
+import { orderStatusFSM } from 'domains/orders/order.machine'
+import { DishesService } from 'domains/dishes/dishes.service'
 
 @Injectable()
 export class OrdersService {
@@ -26,7 +28,8 @@ export class OrdersService {
     private readonly customersService: CustomersService,
     private readonly tablesService: TablesService,
     private readonly ordersGateway: OrdersGateway,
-    private readonly billsService: BillsService
+    private readonly billsService: BillsService,
+    private readonly dishesService: DishesService
   ) {}
 
   async create(createOrderDto: CreateOrderDto, fromCustomer?: boolean) {
@@ -34,6 +37,20 @@ export class OrdersService {
     const table = await this.tablesService.findByTableNumber(tableNumber)
     if (!table) {
       throw new NotFoundError('Bàn không tồn tại')
+    }
+
+    // Kiểm tra trạng thái món ăn có hợp lệ hay không
+    const checkDishesStatusPromises = items.map(async (dishItem) => {
+      const dish = await this.dishesService.findOne(dishItem.dish.toString())
+      if (dish.status === DishStatus.Unavailable) {
+        throw new BadRequestError('Món ăn bạn tạo đã hết hàng')
+      }
+    })
+
+    try {
+      await Promise.all(checkDishesStatusPromises)
+    } catch (error) {
+      throw error
     }
 
     // ---------------- Khách hàng đang ngồi ở bàn -------------------------
@@ -87,7 +104,12 @@ export class OrdersService {
       }
       return newOrders
     } else {
-      //TH3: Nhân viên tạo đơn hàng đầu tiên cho KH mới vô quán
+      // Trong trường hợp khách hàng tắt tab trình duyệt + Đã hoàn tất đơn cho KH đó + KH vào lại trang web để gọi món thì không co đặt
+      if (fromCustomer) {
+        throw new BadRequestError('Bạn không thể tiếp tục gọi món! Vui lòng đăng xuất')
+      }
+
+      //TH4: Nhân viên tạo đơn hàng đầu tiên cho KH mới vô quán
       const newCustomer = await this.customersService.create({ table })
       const orderCode = generateOrderCode()
       return Promise.all(
@@ -220,6 +242,10 @@ export class OrdersService {
     return order
   }
 
+  canTransitionStatus(current: OrderStatus, next: OrderStatus): boolean {
+    return orderStatusFSM[current].includes(next)
+  }
+
   async update(id: string, updateOrderDto: UpdateOrderDto) {
     const order = await this.findOne(id)
     if (!order) {
@@ -227,17 +253,21 @@ export class OrdersService {
     }
 
     // -------------------------- Finite State Machine --------------------------
-    const { status } = updateOrderDto
+    const currentStatus = order.status
+    const { status: nextStatus } = updateOrderDto
+    if (!this.canTransitionStatus(currentStatus, nextStatus)) {
+      throw new BadRequestError(`Không thể chuyển trạng thái đơn hàng từ ${currentStatus} sang ${nextStatus}`)
+    }
 
     const customerCode = order.customer.code
     const dishTitle = order.dish.title
 
-    this.ordersGateway.emitUpdateOrder(customerCode, { dishTitle, status })
+    this.ordersGateway.emitUpdateOrder(customerCode, { dishTitle, status: nextStatus })
     return this.orderModel.findOneAndUpdate(
       {
         _id: id
       },
-      { status },
+      { status: nextStatus },
       {
         returnOriginal: false
       }
