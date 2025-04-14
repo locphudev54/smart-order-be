@@ -22,8 +22,13 @@ export class Dish {
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
   category: CategoryDocument
 
+  @Prop({ required: true, type: Number })
+  cookingTime: number // minutes
+
   @Prop({ required: false, type: String, default: '' })
   imageUrl: string
 }
 
 export const DishSchema = SchemaFactory.createForClass(Dish)
+
+DishSchema.index({ title: 'text', description: 'text' })

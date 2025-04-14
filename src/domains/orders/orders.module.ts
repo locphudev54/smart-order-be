@@ -13,8 +13,8 @@ import { DishesModule } from 'domains/dishes/dishes.module'
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
-    BillsModule,
     forwardRef(() => CustomersModule),
+    forwardRef(() => BillsModule),
     TablesModule,
     DishesModule
   ],

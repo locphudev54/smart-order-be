@@ -1,18 +1,18 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Role } from 'core/constants/enum'
+import { Account } from 'core/decorators/account.decorator'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
+import { Roles } from 'core/decorators/roles.decorator'
+import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
 import { ValidateMongoIdPipe } from 'core/pipes/validate-mongo-id.pipe'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
+import { AccountType } from 'core/types/type'
+import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
 import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { OrdersService } from './orders.service'
-import { ValidateDateRange } from 'core/pipes/validate-date-range.pipe'
-import { DeleteBulkDto } from 'domains/orders/dto/delete-bulk.dto'
-import { Roles } from 'core/decorators/roles.decorator'
-import { Role } from 'core/constants/enum'
-import { AccountType } from 'core/types/type'
-import { Account } from 'core/decorators/account.decorator'
 
 @Controller('orders')
 export class OrdersController {
@@ -30,9 +30,10 @@ export class OrdersController {
   findAll(
     @Query() paginationQuery: PaginationQueryDto,
     @Query(ValidateDateRange) dateRangeQuery: DateRangeQueryDto,
-    @Query() orderQuery: OrderQueryDto
+    @Query() orderQuery: OrderQueryDto,
+    @Account() account: AccountType
   ) {
-    return this.ordersService.findAll({ ...paginationQuery, ...dateRangeQuery, ...orderQuery })
+    return this.ordersService.findAll({ ...paginationQuery, ...dateRangeQuery, ...orderQuery }, account)
   }
 
   @Get('statistics-by-tables')

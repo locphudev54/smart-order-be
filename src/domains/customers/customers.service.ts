@@ -25,6 +25,7 @@ import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 export class CustomersService {
   constructor(
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
+    @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,

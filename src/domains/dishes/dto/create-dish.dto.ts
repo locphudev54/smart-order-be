@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
   MinLength
@@ -42,6 +43,13 @@ export class CreateDishDto {
   @IsMongoId({ message: 'category phải là định dạng ObjectId' })
   @IsNotEmpty({ message: 'category không được bỏ trống' })
   category: Types.ObjectId
+
+  @Max(60 * 3, { message: 'cookingTime phải <= 180 phút' }) // 3 hours
+  @Min(1, { message: 'cookingTime phải > 0' })
+  @IsNumber({ allowNaN: false }, { message: 'cookingTime phải là định dạng số' })
+  @Transform(({ value }) => Number(value))
+  @IsNotEmpty({ message: 'cookingTime không được bỏ trống' })
+  cookingTime: number
 
   @IsString({ message: 'imageUrl phải là kiểu dữ liệu là string' })
   @IsOptional()

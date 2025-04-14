@@ -18,7 +18,7 @@ export class DishesService {
   }
 
   async findAll(qs: PaginationQueryDto & DishQueryDto) {
-    const { page, limit, sort: sortQuery } = qs
+    const { page, limit, sort: sortQuery, keyword } = qs
     const filter: FilterQuery<Category> = {}
 
     let sort = '-createdAt'
@@ -27,6 +27,11 @@ export class DishesService {
       const isDescending = sortQuery.split('.')[1] === 'desc'
       sort = isDescending ? `-${sortField}` : sortField
     }
+
+    // Full Text Search in Mongoose
+    // if (keyword) {
+    //   filter.title = { $regex: keyword, $options: 'i' }
+    // }
 
     const query = this.dishModel.find(filter).populate([{ path: 'category', select: ['_id', 'title'] }])
 

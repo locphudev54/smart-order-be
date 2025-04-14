@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { DishStatus, OrderStatus, TableStatus } from 'core/constants/enum'
+import { DishStatus, OrderStatus, Role, TableStatus } from 'core/constants/enum'
 import { BadRequestError, NotFoundError } from 'core/exceptions/errors.exception'
 import { DateRangeQueryDto } from 'core/query-string-dtos/date-range-query.dto'
 import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
@@ -14,7 +14,7 @@ import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
 import { OrdersGateway } from 'domains/orders/orders.gateway'
 import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
 import { TablesService } from 'domains/tables/tables.service'
-import { FilterQuery, Model } from 'mongoose'
+import { FilterQuery, Model, PipelineStage, SortOrder } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { orderStatusFSM } from 'domains/orders/order.machine'
@@ -26,9 +26,10 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: Model<Order>,
     @Inject(forwardRef(() => CustomersService))
     private readonly customersService: CustomersService,
+    @Inject(forwardRef(() => BillsService))
+    private readonly billsService: BillsService,
     private readonly tablesService: TablesService,
     private readonly ordersGateway: OrdersGateway,
-    private readonly billsService: BillsService,
     private readonly dishesService: DishesService
   ) {}
 
@@ -77,7 +78,7 @@ export class OrdersService {
         )
 
         if (fromCustomer) {
-          this.ordersGateway.emitNewOrder({ tableNumber, quantity: newOrders.length })
+          this.ordersGateway.emitNewOrderByCustomer({ tableNumber, quantity: newOrders.length })
         }
         return newOrders
       }
@@ -100,11 +101,11 @@ export class OrdersService {
         )
       )
       if (fromCustomer) {
-        this.ordersGateway.emitNewOrder({ tableNumber, quantity: newOrders.length })
+        this.ordersGateway.emitNewOrderByCustomer({ tableNumber, quantity: newOrders.length })
       }
       return newOrders
     } else {
-      // Trong trường hợp khách hàng tắt tab trình duyệt + Đã hoàn tất đơn cho KH đó + KH vào lại trang web để gọi món thì không co đặt
+      // TH3: Trong trường hợp khách hàng tắt tab trình duyệt + Đã hoàn tất đơn cho KH đó + KH vào lại trang web để gọi món thì không cho đặt
       if (fromCustomer) {
         throw new BadRequestError('Bạn không thể tiếp tục gọi món! Vui lòng đăng xuất')
       }
@@ -130,7 +131,7 @@ export class OrdersService {
     }
   }
 
-  async findAll(qs: PaginationQueryDto & DateRangeQueryDto & OrderQueryDto) {
+  async findAll(qs: PaginationQueryDto & DateRangeQueryDto & OrderQueryDto, account?: AccountType | undefined) {
     const { page, limit, from, to, sort: sortQuery, customerCode, status, code, tableNumber } = qs
     // sort và status là những query có gtri đặc biệt -> phải transform thành cú pháp hợp lệ trước khi mà thực hiện filter
     // customerCode và tableNumber là query đặc biệt -> dùng để query nested Object
@@ -158,11 +159,15 @@ export class OrdersService {
     }
 
     // sort: createdAt.desc || createdAt.asc
-    let sort = '-createdAt'
+    let sort: Record<string, 1 | -1> = { createdAt: -1 }
     if (sortQuery) {
       const sortField = sortQuery.split('.')[0]
       const isDescending = sortQuery.split('.')[1] === 'desc'
-      sort = isDescending ? `-${sortField}` : sortField
+      sort = isDescending ? { [sortField]: -1 } : { [sortField]: 1 }
+    }
+
+    if (account && account.role === Role.Chef) {
+      sort = { ...sort, ['dish.cookingTime']: 1 }
     }
 
     if (from || to) {
@@ -171,16 +176,68 @@ export class OrdersService {
       if (to) filter.createdAt.$lt = to
     }
 
-    const query = this.orderModel
-      .find(filter)
-      .populate([{ path: 'customer', select: ['_id', 'code'] }, { path: 'dish' }])
+    const pipeline: PipelineStage[] = [
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'Dishes',
+          localField: 'dish',
+          foreignField: '_id',
+          as: 'dishDoc'
+        }
+      },
+      {
+        $unwind: { path: '$dishDoc', preserveNullAndEmptyArrays: true }
+      },
+      {
+        $lookup: {
+          from: 'Customers',
+          localField: 'customer',
+          foreignField: '_id',
+          as: 'customerDoc'
+        }
+      },
+      {
+        $unwind: { path: '$customerDoc', preserveNullAndEmptyArrays: true }
+      },
+      {
+        $sort: sort
+      },
+      {
+        $project: {
+          // Exclude the temporary lookup fields if you don't need them
+          // dishDoc: 0,
+          // customerDoc: 0,
+
+          // Include original Order fields
+          _id: 1,
+          code: 1,
+          price: 1,
+          quantity: 1,
+          totalPrice: 1,
+          note: 1,
+          status: 1,
+          tableNumber: 1,
+          paidAt: 1,
+          cookingCompletedAt: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          customer: {
+            _id: '$customerDoc._id',
+            code: '$customerDoc.code'
+          },
+          dish: '$dishDoc'
+        }
+      }
+    ]
+
+    const query = this.orderModel.aggregate(pipeline)
 
     if (limit && page) {
-      query
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort(sort)
+      query.skip((page - 1) * limit).limit(limit)
     }
+
+    // query.sort(sort)
 
     const [data, totalDocuments] = await Promise.all([query, this.orderModel.countDocuments(filter)])
 
@@ -261,13 +318,20 @@ export class OrdersService {
 
     const customerCode = order.customer.code
     const dishTitle = order.dish.title
-
     this.ordersGateway.emitUpdateOrder(customerCode, { dishTitle, status: nextStatus })
+
+    const now = new Date()
+    if (updateOrderDto.status === OrderStatus.Cooked) {
+      updateOrderDto.cookingCompletedAt = now
+    } else if (updateOrderDto.status === OrderStatus.Paid) {
+      updateOrderDto.paidAt = now
+    }
+
     return this.orderModel.findOneAndUpdate(
       {
         _id: id
       },
-      { status: nextStatus },
+      updateOrderDto,
       {
         returnOriginal: false
       }

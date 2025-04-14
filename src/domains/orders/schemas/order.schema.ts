@@ -39,6 +39,12 @@ export class Order {
   @Prop({ required: true, type: Number })
   tableNumber: number
 
+  @Prop({ required: false, type: Date, default: '' })
+  paidAt: Date
+
+  @Prop({ required: false, type: Date, default: '' })
+  cookingCompletedAt: Date
+
   // @Prop({ default: () => moment().tz('Asia/Ho_Chi_Minh').toDate() })
   // createdAt: Date
 

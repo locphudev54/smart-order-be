@@ -1,12 +1,21 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types'
-import { IsEnum, IsOptional } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsDate, IsEnum, IsOptional } from 'class-validator'
 import { OrderStatus } from 'core/constants/enum'
-import { CreateOrderDto } from 'domains/orders/dto/create-order.dto'
 
-export class UpdateOrderDto extends OmitType(PartialType(CreateOrderDto), ['tableNumber', 'items']) {
+export class UpdateOrderDto {
   @IsEnum(OrderStatus, {
     message: `status phải là một trong những giá trị sau: ${Object.values(OrderStatus).join(' || ')}`
   })
   @IsOptional()
   status?: OrderStatus | undefined
+
+  @IsDate({ message: 'paidAt phải là định dạng ngày' })
+  @Type(() => Date)
+  @IsOptional()
+  paidAt?: Date | undefined
+
+  @IsDate({ message: 'cookingCompletedAt phải là định dạng ngày' })
+  @Type(() => Date)
+  @IsOptional()
+  cookingCompletedAt?: Date | undefined
 }

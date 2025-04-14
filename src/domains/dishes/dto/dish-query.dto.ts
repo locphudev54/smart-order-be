@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer'
-import { IsEnum, IsOptional, IsString, Min, MinLength } from 'class-validator'
-import { OrderStatus } from 'core/constants/enum'
+import { IsOptional, IsString, MinLength } from 'class-validator'
 
 export class DishQueryDto {
   @MinLength(5, { message: 'sort phải có ít nhất 5 ký tự' })
@@ -9,21 +8,7 @@ export class DishQueryDto {
   @IsOptional()
   sort?: string | undefined
 
-  @MinLength(1, { message: 'code phải có ít nhất 1 ký tự' })
-  @IsString({ message: 'code phải là định dạng chuỗi' })
-  @Type(() => String)
+  @IsString()
   @IsOptional()
-  code?: string | undefined
-
-  @MinLength(1, { message: 'customerCode phải có ít nhất 1 ký tự' })
-  @IsString({ message: 'customerCode phải là định dạng chuỗi' })
-  @Type(() => String)
-  @IsOptional()
-  customerCode?: string | undefined
-
-  @IsEnum(OrderStatus, {
-    message: `status phải là một trong những giá trị sau: ${Object.values(OrderStatus).join(' || ')}`
-  })
-  @IsOptional()
-  status?: OrderStatus | undefined
+  keyword?: string | undefined
 }

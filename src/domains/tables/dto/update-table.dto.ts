@@ -1,9 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { CreateTableDto } from './create-table.dto'
-import { IsBoolean, IsBooleanString, IsMongoId, IsOptional } from 'class-validator'
-import { Types } from 'mongoose'
-import { Transform, Type } from 'class-transformer'
+import { Transform } from 'class-transformer'
+import { IsMongoId, IsOptional } from 'class-validator'
 import { UnprocessableEntityError } from 'core/exceptions/errors.exception'
+import { Types } from 'mongoose'
+import { CreateTableDto } from './create-table.dto'
 
 export class UpdateTableDto extends PartialType(CreateTableDto) {
   @Transform(({ value }) => {
