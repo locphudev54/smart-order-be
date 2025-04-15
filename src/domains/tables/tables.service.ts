@@ -10,7 +10,7 @@ import { CreateTableDto } from 'domains/tables/dto/create-table.dto'
 import { TableQueryDto } from 'domains/tables/dto/table-query.dto'
 import { UpdateTableDto } from 'domains/tables/dto/update-table.dto'
 import { Table, TableDocument } from 'domains/tables/schemas/table.schema'
-import { Model } from 'mongoose'
+import { FilterQuery, Model } from 'mongoose'
 
 @Injectable()
 export class TablesService {
@@ -36,20 +36,17 @@ export class TablesService {
   }
 
   async findAll(qs: PaginationQueryDto & TableQueryDto) {
-    const { page, limit, sort: sortQuery, ...filter } = qs
+    const { page, limit, sort: sortQuery, number } = qs
+
+    const filter: FilterQuery<TableDocument> = {}
+    if (number) {
+      filter.number = number
+    }
+
     const sortField = sortQuery?.split('.')?.[0]
     const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
 
     // --------------------- Filter key of nested object ---------------------
-    // const { customerCode } = orderFilter
-    // delete orderFilter.customerCode
-    // const customerId = (await this.customersService.findByCode(customerCode))?._id
-
-    // const filter: any = orderFilter
-    // if (customerCode) {
-    //   filter.customer = customerId
-    // }
-
     const query = this.tableModel.find(filter).populate({ path: 'customer', select: ['_id', 'code'] })
 
     if (limit && page) {

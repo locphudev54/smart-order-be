@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer'
-import { IsEnum, IsOptional, IsString, Min, MinLength } from 'class-validator'
+import { IsEnum, IsInt, IsOptional, IsPositive, IsString, Min, MinLength } from 'class-validator'
 import { OrderStatus } from 'core/constants/enum'
 
 export class TableQueryDto {
@@ -9,21 +9,9 @@ export class TableQueryDto {
   @IsOptional()
   sort?: string | undefined
 
-  @MinLength(1, { message: 'code phải có ít nhất 1 ký tự' })
-  @IsString({ message: 'code phải là định dạng chuỗi' })
-  @Type(() => String)
+  @IsPositive({ message: 'Số bàn không được âm' })
+  @IsInt({ message: 'Số bàn phải là số nguyên' })
+  @Type(() => Number)
   @IsOptional()
-  code?: string | undefined
-
-  @MinLength(1, { message: 'customerCode phải có ít nhất 1 ký tự' })
-  @IsString({ message: 'customerCode phải là định dạng chuỗi' })
-  @Type(() => String)
-  @IsOptional()
-  customerCode?: string | undefined
-
-  @IsEnum(OrderStatus, {
-    message: `status phải là một trong những giá trị sau: ${Object.values(OrderStatus).join(' || ')}`
-  })
-  @IsOptional()
-  status?: OrderStatus | undefined
+  number?: number | undefined
 }

@@ -79,6 +79,11 @@ export class OrdersService {
 
         if (fromCustomer) {
           this.ordersGateway.emitNewOrderByCustomer({ tableNumber, quantity: newOrders.length })
+        } else {
+          this.ordersGateway.emitNewOrderByEmployee(customerId as unknown as string, {
+            tableNumber: table.number,
+            quantity: items.length
+          })
         }
         return newOrders
       }
@@ -102,6 +107,11 @@ export class OrdersService {
       )
       if (fromCustomer) {
         this.ordersGateway.emitNewOrderByCustomer({ tableNumber, quantity: newOrders.length })
+      } else {
+        this.ordersGateway.emitNewOrderByEmployee(customerId as unknown as string, {
+          tableNumber: table.number,
+          quantity: items.length
+        })
       }
       return newOrders
     } else {
@@ -167,7 +177,7 @@ export class OrdersService {
     }
 
     if (account && account.role === Role.Chef) {
-      sort = { ...sort, ['dish.cookingTime']: 1 }
+      sort = { ...sort, ['dish.cookingTime']: -1 }
     }
 
     if (from || to) {
