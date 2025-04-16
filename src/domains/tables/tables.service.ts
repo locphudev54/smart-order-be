@@ -36,13 +36,7 @@ export class TablesService {
   }
 
   async findAll(qs: PaginationQueryDto & TableQueryDto) {
-    const { page, limit, sort: sortQuery, number } = qs
-
-    const filter: FilterQuery<TableDocument> = {}
-    if (number) {
-      filter.number = number
-    }
-
+    const { page, limit, sort: sortQuery, ...filter } = qs
     const sortField = sortQuery?.split('.')?.[0]
     const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField
 

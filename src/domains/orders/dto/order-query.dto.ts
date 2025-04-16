@@ -1,7 +1,8 @@
 import { Transform, Type } from 'class-transformer'
-import { ArrayMinSize, IsEnum, IsInt, IsOptional, IsPositive, IsString, MinLength } from 'class-validator'
+import { ArrayMinSize, IsEnum, IsInt, IsMongoId, IsOptional, IsPositive, IsString, MinLength } from 'class-validator'
 import { OrderStatus } from 'core/constants/enum'
 import { IsUniqueArray } from 'core/decorators/is-unique-array.decorator'
+import { Types } from 'mongoose'
 
 export class OrderQueryDto {
   @MinLength(5, { message: 'sort phải có ít nhất 5 ký tự' })
@@ -49,6 +50,10 @@ export class OrderQueryDto {
   )
   @IsOptional()
   tableNumber?: number[] | undefined
+
+  @IsMongoId({ message: 'customerId phải là định dạng ObjectId' })
+  @IsOptional()
+  customerId?: Types.ObjectId | undefined
 
   // NOTE: VALIDATE ARRAY OF ENUM
   // @IsEnum(OrderStatus, {

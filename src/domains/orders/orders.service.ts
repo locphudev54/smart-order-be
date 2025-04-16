@@ -14,7 +14,7 @@ import { OrderQueryDto } from 'domains/orders/dto/order-query.dto'
 import { OrdersGateway } from 'domains/orders/orders.gateway'
 import { Order, OrderDocument } from 'domains/orders/schemas/order.schema'
 import { TablesService } from 'domains/tables/tables.service'
-import { FilterQuery, Model, PipelineStage, SortOrder } from 'mongoose'
+import { FilterQuery, Model, PipelineStage, SortOrder, Types } from 'mongoose'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { orderStatusFSM } from 'domains/orders/order.machine'
@@ -80,7 +80,7 @@ export class OrdersService {
         if (fromCustomer) {
           this.ordersGateway.emitNewOrderByCustomer({ tableNumber, quantity: newOrders.length })
         } else {
-          this.ordersGateway.emitNewOrderByEmployee(customerId as unknown as string, {
+          this.ordersGateway.emitNewOrderByEmployee((customerId as unknown as string).toString(), {
             tableNumber: table.number,
             quantity: items.length
           })
@@ -108,7 +108,7 @@ export class OrdersService {
       if (fromCustomer) {
         this.ordersGateway.emitNewOrderByCustomer({ tableNumber, quantity: newOrders.length })
       } else {
-        this.ordersGateway.emitNewOrderByEmployee(customerId as unknown as string, {
+        this.ordersGateway.emitNewOrderByEmployee((customerId as unknown as string).toString(), {
           tableNumber: table.number,
           quantity: items.length
         })
@@ -148,12 +148,16 @@ export class OrdersService {
     // Cho nên ta phải tasck 3 query value đó ra riêng
 
     // Filter key of nested object
-    const customerId = (await this.customersService.findByCode(customerCode))?._id
 
     const filter: FilterQuery<OrderDocument> = {}
 
     if (customerCode) {
+      const customerId = (await this.customersService.findByCode(customerCode))?._id
       filter.customer = customerId
+    }
+
+    if (qs.customerId) {
+      filter.customer = new Types.ObjectId(qs.customerId)
     }
 
     if (status) {
@@ -177,7 +181,7 @@ export class OrdersService {
     }
 
     if (account && account.role === Role.Chef) {
-      sort = { ...sort, ['dish.cookingTime']: -1 }
+      sort = { ...sort, ['dishDoc.cookingTime']: -1 }
     }
 
     if (from || to) {

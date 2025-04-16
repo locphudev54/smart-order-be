@@ -29,9 +29,9 @@ export class DishesService {
     }
 
     // Full Text Search in Mongoose
-    // if (keyword) {
-    //   filter.title = { $regex: keyword, $options: 'i' }
-    // }
+    if (keyword) {
+      filter.$text = { $search: keyword }
+    }
 
     const query = this.dishModel.find(filter).populate([{ path: 'category', select: ['_id', 'title'] }])
 
