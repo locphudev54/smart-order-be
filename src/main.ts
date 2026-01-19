@@ -16,6 +16,8 @@ async function bootstrap() {
 
   app.use(helmet())
 
+  const configService = app.get(ConfigService)
+
   app.enableVersioning({
     type: VersioningType.URI,
     prefix: 'api/v',
