@@ -251,8 +251,6 @@ export class OrdersService {
       query.skip((page - 1) * limit).limit(limit)
     }
 
-    // query.sort(sort)
-
     const [data, totalDocuments] = await Promise.all([query, this.orderModel.countDocuments(filter)])
 
     return {
@@ -356,7 +354,7 @@ export class OrdersService {
     return this.orderModel.deleteOne({ _id: id })
   }
 
-  async removeBulk(ids: DeleteBulkDto) {
+  async removeBulk({ ids }: DeleteBulkDto) {
     return this.orderModel.deleteMany({ _id: ids })
   }
 

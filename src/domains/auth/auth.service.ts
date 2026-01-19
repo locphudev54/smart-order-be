@@ -14,6 +14,7 @@ import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
 import mongoose from 'mongoose'
 import ms, { StringValue } from 'ms'
+import { UpdateProfileDto } from './dtos/update-profile.dto'
 
 @Injectable()
 export class AuthService {
@@ -194,6 +195,15 @@ export class AuthService {
       }
       throw error
     }
+  }
+
+  async updateProfile(updateProfileDto: UpdateProfileDto, account: AccountType) {
+    // Only allow updating fullName and avatarUrl
+    const updateAccountDto: any = {}
+    if (updateProfileDto.name) updateAccountDto.fullName = updateProfileDto.name
+    if (updateProfileDto.avatarUrl) updateAccountDto.avatarUrl = updateProfileDto.avatarUrl
+    // Email is omitted in UpdateAccountDto, so do not update email
+    return this.accountsService.update(account._id, updateAccountDto)
   }
 
   signAccessToken(payload: AccountType) {

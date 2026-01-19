@@ -12,6 +12,7 @@ import { LoginDto } from 'domains/auth/dtos/login.dto'
 import { LogoutDto } from 'domains/auth/dtos/logout.dto'
 import { RefreshTokenDto } from 'domains/auth/dtos/refresh-token.dto'
 import { RegisterAccountDto } from 'domains/auth/dtos/register-account-dto'
+import { UpdateProfileDto } from 'domains/auth/dtos/update-profile.dto'
 import { Request as RequestType, Response } from 'express'
 
 @Controller('auth')
@@ -53,6 +54,11 @@ export class AuthController {
   @Patch('change-password')
   changePassword(@Body() changePasswordDto: ChangePasswordDto, @Account() account: AccountType) {
     return this.authService.changePassword(changePasswordDto, account)
+  }
+
+  @Patch('profile')
+  updateProfile(@Body() updateProfileDto: UpdateProfileDto, @Account() account: AccountType) {
+    return this.authService.updateProfile(updateProfileDto, account)
   }
   @Post('logout')
   logout(@Body() logoutDto: LogoutDto) {
