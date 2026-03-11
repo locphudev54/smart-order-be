@@ -61,7 +61,7 @@
     "xstate": "^5.19.2"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
