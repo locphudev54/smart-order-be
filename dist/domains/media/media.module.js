@@ -8,11 +8,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MediaModule = void 0;
 const common_1 = require("@nestjs/common");
-const media_controller_1 = require("./media.controller");
-const media_service_1 = require("./media.service");
-const jwt_customer_strategy_1 = require("../customers/jwt-customer.strategy");
 const jwt_employee_strategy_1 = require("../auth/jwt-employee.strategy");
 const cloudinary_module_1 = require("../cloudinary/cloudinary.module");
+const jwt_customer_strategy_1 = require("../customers/jwt-customer.strategy");
+const media_controller_1 = require("./media.controller");
+const media_service_1 = require("./media.service");
 let MediaModule = class MediaModule {
 };
 exports.MediaModule = MediaModule;

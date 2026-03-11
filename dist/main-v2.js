@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const core_1 = require("@nestjs/core");
 const platform_express_1 = require("@nestjs/platform-express");
 const path_1 = __importDefault(require("path"));
@@ -16,6 +17,8 @@ const server = (0, express_1.default)();
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(server));
     app.use((0, helmet_1.default)());
+    const configService = app.get(config_1.ConfigService);
+    const port = configService.get('port');
     app.enableVersioning({
         type: common_1.VersioningType.URI,
         prefix: 'api/v',
@@ -31,12 +34,12 @@ async function bootstrap() {
         .setDescription('SOA Spring, 2025 - TDTU')
         .setVersion('1.0')
         .build();
-    const document = swagger_1.SwaggerModule.createDocument(app, config);
-    swagger_1.SwaggerModule.setup('docs', app, document, {
+    const documentFactory = () => swagger_1.SwaggerModule.createDocument(app, config);
+    swagger_1.SwaggerModule.setup('docs', app, documentFactory, {
         jsonDocumentUrl: 'docs/json'
     });
-    await app.init();
+    app.use((0, helmet_1.default)());
+    await app.listen(port);
 }
 bootstrap();
-exports.default = server;
 //# sourceMappingURL=main-v2.js.map
