@@ -7,10 +7,10 @@ export declare class MediaController {
     private readonly configService;
     private readonly cloudinaryService;
     constructor(mediaService: MediaService, configService: ConfigService, cloudinaryService: CloudinaryService);
-    uploadImage(file: Express.Multer.File, req: RequestType): Promise<{
+    uploadImage(file: any, req: RequestType): Promise<{
         result: any;
     }>;
-    uploadMultipleFiles(files: Array<Express.Multer.File>, req: RequestType): Promise<{
+    uploadMultipleFiles(files: any[], req: RequestType): Promise<{
         result: string[];
     }>;
 }

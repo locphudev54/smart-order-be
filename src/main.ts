@@ -37,15 +37,16 @@ async function bootstrap() {
     .setVersion('1.0')
     .build()
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config)
+  const document = SwaggerModule.createDocument(app, config)
 
-  SwaggerModule.setup('docs', app, documentFactory, {
-    jsonDocumentUrl: 'docs/json'
-  })
+  SwaggerModule.setup('docs', app, document)
 
   await app.init()
 }
 
-bootstrap()
+const bootstrapPromise = bootstrap()
 
-export default server
+export default async function handler(req, res) {
+  await bootstrapPromise
+  server(req, res)
+}

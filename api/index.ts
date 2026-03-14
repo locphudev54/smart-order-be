@@ -1,3 +1,2 @@
-import server from '../dist/main'
-
-export default server
+import handler from '../dist/main'
+export default handler

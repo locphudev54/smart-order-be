@@ -26,7 +26,7 @@ export class MediaController {
   @Post('upload/single')
   @ResponseMessage('Upload hình ảnh thành công')
   @UseInterceptors(FileInterceptor('file', createMulterOptions(LIMIT_UPLOAD_SINGLE_FILE)))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @Request() req: RequestType) {
+  async uploadImage(@UploadedFile() file: any, @Request() req: RequestType) {
     const res = await this.cloudinaryService.uploadFile(file, req)
     return {
       result: res.secure_url
@@ -39,7 +39,7 @@ export class MediaController {
   @UseInterceptors(
     FilesInterceptor('files', MAX_COUNT_UPLOAD_MULTIPLE_FILE, createMulterOptions(LIMIT_UPLOAD_MULTIPLE_FILE))
   )
-  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @Request() req: RequestType) {
+  async uploadMultipleFiles(@UploadedFiles() files: any[], @Request() req: RequestType) {
     const urls = await this.cloudinaryService.uploadFiles(files, req)
     return {
       result: urls

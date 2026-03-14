@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common'
 import { extname } from 'path'
 
-export const imageFileFilter = (req, file: Express.Multer.File, callback) => {
+export const imageFileFilter = (req, file: any, callback) => {
   // Danh sách MIME type hợp lệ
   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
@@ -11,7 +11,7 @@ export const imageFileFilter = (req, file: Express.Multer.File, callback) => {
   callback(null, true)
 }
 
-export const editFileName = (req, file: Express.Multer.File, callback) => {
+export const editFileName = (req, file: any, callback) => {
   const name = file.originalname.split('.')[0]
   const fileExtName = extname(file.originalname)
   const randomName = Array(4)

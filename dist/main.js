@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = handler;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const core_1 = require("@nestjs/core");
@@ -33,12 +34,13 @@ async function bootstrap() {
         .setDescription('SOA Spring, 2025 - TDTU')
         .setVersion('1.0')
         .build();
-    const documentFactory = () => swagger_1.SwaggerModule.createDocument(app, config);
-    swagger_1.SwaggerModule.setup('docs', app, documentFactory, {
-        jsonDocumentUrl: 'docs/json'
-    });
+    const document = swagger_1.SwaggerModule.createDocument(app, config);
+    swagger_1.SwaggerModule.setup('docs', app, document);
     await app.init();
 }
-bootstrap();
-exports.default = server;
+const bootstrapPromise = bootstrap();
+async function handler(req, res) {
+    await bootstrapPromise;
+    server(req, res);
+}
 //# sourceMappingURL=main.js.map

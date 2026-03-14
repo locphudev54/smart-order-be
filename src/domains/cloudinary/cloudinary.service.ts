@@ -6,7 +6,7 @@ import { Request } from 'express'
 
 @Injectable()
 export class CloudinaryService {
-  async uploadFile(file: Express.Multer.File, req: Request): Promise<UploadApiResponse | UploadApiErrorResponse> {
+  async uploadFile(file: any, req: Request): Promise<UploadApiResponse | UploadApiErrorResponse> {
     const folderName = req.headers['folder-name'] ?? 'tmp'
 
     return new Promise((resolve, reject) => {
@@ -26,7 +26,7 @@ export class CloudinaryService {
         .end(file.buffer)
     })
   }
-  async uploadFiles(files: Express.Multer.File[], req: Request) {
+  async uploadFiles(files: any[], req: Request) {
     const urls = await Promise.all(
       files.map(async (file): Promise<string> => {
         const { secure_url } = await this.uploadFile(file, req)
