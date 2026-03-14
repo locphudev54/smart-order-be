@@ -78,7 +78,7 @@ let CustomersService = class CustomersService {
         };
     }
     async findOrders(customer) {
-        return this.ordersService.findAll({ customerCode: customer.code });
+        return this.ordersService.findAll({ customerId: customer._id });
     }
     async findOne(id) {
         const customer = await this.customerModel.findOne({ _id: id }).select(['-refreshToken']);

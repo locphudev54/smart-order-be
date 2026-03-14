@@ -14,7 +14,6 @@ const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const enum_1 = require("../../../core/constants/enum");
 const is_unique_array_decorator_1 = require("../../../core/decorators/is-unique-array.decorator");
-const mongoose_1 = require("mongoose");
 class OrderQueryDto {
 }
 exports.OrderQueryDto = OrderQueryDto;
@@ -69,6 +68,6 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsMongoId)({ message: 'customerId phải là định dạng ObjectId' }),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", mongoose_1.Types.ObjectId)
+    __metadata("design:type", String)
 ], OrderQueryDto.prototype, "customerId", void 0);
 //# sourceMappingURL=order-query.dto.js.map

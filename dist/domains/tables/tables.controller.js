@@ -23,6 +23,7 @@ const table_query_dto_1 = require("./dto/table-query.dto");
 const response_message_decorator_1 = require("../../core/decorators/response-message.decorator");
 const roles_decorator_1 = require("../../core/decorators/roles.decorator");
 const enum_1 = require("../../core/constants/enum");
+const public_decorator_1 = require("../../core/decorators/public.decorator");
 let TablesController = class TablesController {
     constructor(tablesService) {
         this.tablesService = tablesService;
@@ -54,6 +55,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], TablesController.prototype, "create", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     (0, response_message_decorator_1.ResponseMessage)('Lấy danh sách bàn thành công'),
     __param(0, (0, common_1.Query)()),

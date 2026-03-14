@@ -53,7 +53,7 @@ export class OrderQueryDto {
 
   @IsMongoId({ message: 'customerId phải là định dạng ObjectId' })
   @IsOptional()
-  customerId?: Types.ObjectId | undefined
+  customerId?: string | undefined
 
   // NOTE: VALIDATE ARRAY OF ENUM
   // @IsEnum(OrderStatus, {

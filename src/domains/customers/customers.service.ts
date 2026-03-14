@@ -87,7 +87,7 @@ export class CustomersService {
   }
 
   async findOrders(customer: CustomerType) {
-    return this.ordersService.findAll({ customerCode: customer.code })
+    return this.ordersService.findAll({ customerId: customer._id })
   }
 
   async findOne(id: string) {

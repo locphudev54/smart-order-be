@@ -8,6 +8,7 @@ import { TableQueryDto } from 'domains/tables/dto/table-query.dto'
 import { ResponseMessage } from 'core/decorators/response-message.decorator'
 import { Roles } from 'core/decorators/roles.decorator'
 import { Role } from 'core/constants/enum'
+import { Public } from 'core/decorators/public.decorator'
 
 @Controller('tables')
 export class TablesController {
@@ -20,6 +21,7 @@ export class TablesController {
     return this.tablesService.create(createTableDto)
   }
 
+  @Public()
   @Get()
   @ResponseMessage('Lấy danh sách bàn thành công')
   findAll(@Query() paginationQuery: PaginationQueryDto, @Query() tableQuery: TableQueryDto) {
