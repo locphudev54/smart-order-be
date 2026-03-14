@@ -9,13 +9,13 @@ export declare class BillsService {
     private readonly billModel;
     private readonly ordersService;
     constructor(billModel: Model<Bill>, ordersService: OrdersService);
-    create(createBillDto: CreateBillDto, account: AccountType): Promise<import("mongoose").Document<unknown, {}, Bill, {}> & Bill & {
+    create(createBillDto: CreateBillDto, account: AccountType): Promise<import("mongoose").Document<unknown, {}, Bill, {}, {}> & Bill & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }>;
     findAll(qs: PaginationQueryDto & DateRangeQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, Bill, {}> & Bill & {
+        data: (import("mongoose").Document<unknown, {}, Bill, {}, {}> & Bill & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;

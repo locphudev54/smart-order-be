@@ -8,7 +8,7 @@ import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 export declare class CustomersController {
     private readonly customersService;
     constructor(customersService: CustomersService);
-    createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType): Promise<(import("mongoose").Document<unknown, {}, import("../orders/schemas/order.schema").Order, {}> & import("../orders/schemas/order.schema").Order & {
+    createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType): Promise<(import("mongoose").Document<unknown, {}, import("../orders/schemas/order.schema").Order, {}, {}> & import("../orders/schemas/order.schema").Order & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -22,11 +22,11 @@ export declare class CustomersController {
             totalDocuments: number;
         };
     }>;
-    me(customer: CustomerType): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}> & import("./schemas/customer.schema").Customer & {
+    me(customer: CustomerType): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}, {}> & import("./schemas/customer.schema").Customer & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}> & import("./schemas/customer.schema").Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}, {}> & import("./schemas/customer.schema").Customer & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -34,11 +34,11 @@ export declare class CustomersController {
         _id: import("mongoose").Types.ObjectId;
     }>>;
     findAll(paginationQuery: PaginationQueryDto, dateRangeQuery: DateRangeQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}> & import("./schemas/customer.schema").Customer & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}, {}> & import("./schemas/customer.schema").Customer & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}> & import("./schemas/customer.schema").Customer & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/customer.schema").Customer, {}, {}> & import("./schemas/customer.schema").Customer & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;

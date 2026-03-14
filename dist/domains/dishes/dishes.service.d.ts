@@ -7,11 +7,11 @@ import { UpdateDishDto } from './dto/update-dish.dto';
 export declare class DishesService {
     private readonly dishModel;
     constructor(dishModel: Model<DishDocument>);
-    create(createDishDto: CreateDishDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Dish, {}> & Dish & {
+    create(createDishDto: CreateDishDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Dish, {}, {}> & Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Dish, {}> & Dish & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Dish, {}, {}> & Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -19,11 +19,11 @@ export declare class DishesService {
         _id: import("mongoose").Types.ObjectId;
     }>>;
     findAll(qs: PaginationQueryDto & DishQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Dish, {}> & Dish & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Dish, {}, {}> & Dish & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, Dish, {}> & Dish & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, Dish, {}, {}> & Dish & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
@@ -37,11 +37,11 @@ export declare class DishesService {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Dish, {}> & Dish & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Dish, {}, {}> & Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Dish, {}> & Dish & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Dish, {}, {}> & Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

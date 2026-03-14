@@ -6,11 +6,11 @@ import { UpdateDishDto } from './dto/update-dish.dto';
 export declare class DishesController {
     private readonly dishesService;
     constructor(dishesService: DishesService);
-    create(createDishDto: CreateDishDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}> & import("./schemas/dish.schema").Dish & {
+    create(createDishDto: CreateDishDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}, {}> & import("./schemas/dish.schema").Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}> & import("./schemas/dish.schema").Dish & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}, {}> & import("./schemas/dish.schema").Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -18,11 +18,11 @@ export declare class DishesController {
         _id: import("mongoose").Types.ObjectId;
     }>>;
     findAll(paginationQuery: PaginationQueryDto, tableQuery: DishQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}> & import("./schemas/dish.schema").Dish & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}, {}> & import("./schemas/dish.schema").Dish & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}> & import("./schemas/dish.schema").Dish & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}, {}> & import("./schemas/dish.schema").Dish & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
@@ -36,11 +36,11 @@ export declare class DishesController {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}> & import("./schemas/dish.schema").Dish & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}, {}> & import("./schemas/dish.schema").Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}> & import("./schemas/dish.schema").Dish & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/dish.schema").Dish, {}, {}> & import("./schemas/dish.schema").Dish & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

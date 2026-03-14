@@ -11,11 +11,11 @@ export declare class Dish {
     cookingTime: number;
     imageUrl: string;
 }
-export declare const DishSchema: mongoose.Schema<Dish, mongoose.Model<Dish, any, any, any, mongoose.Document<unknown, any, Dish, any> & Dish & {
+export declare const DishSchema: mongoose.Schema<Dish, mongoose.Model<Dish, any, any, any, mongoose.Document<unknown, any, Dish, any, {}> & Dish & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
-}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Dish, mongoose.Document<unknown, {}, mongoose.FlatRecord<Dish>, {}> & mongoose.FlatRecord<Dish> & {
+}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Dish, mongoose.Document<unknown, {}, mongoose.FlatRecord<Dish>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<Dish> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;

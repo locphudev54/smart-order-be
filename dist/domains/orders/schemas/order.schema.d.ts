@@ -16,11 +16,11 @@ export declare class Order {
     paidAt: Date;
     cookingCompletedAt: Date;
 }
-export declare const OrderSchema: mongoose.Schema<Order, mongoose.Model<Order, any, any, any, mongoose.Document<unknown, any, Order, any> & Order & {
+export declare const OrderSchema: mongoose.Schema<Order, mongoose.Model<Order, any, any, any, mongoose.Document<unknown, any, Order, any, {}> & Order & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
-}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Order, mongoose.Document<unknown, {}, mongoose.FlatRecord<Order>, {}> & mongoose.FlatRecord<Order> & {
+}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Order, mongoose.Document<unknown, {}, mongoose.FlatRecord<Order>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<Order> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;

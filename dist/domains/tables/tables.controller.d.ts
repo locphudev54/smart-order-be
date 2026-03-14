@@ -6,11 +6,11 @@ import { TableQueryDto } from 'domains/tables/dto/table-query.dto';
 export declare class TablesController {
     private readonly tablesService;
     constructor(tablesService: TablesService);
-    create(createTableDto: CreateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+    create(createTableDto: CreateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -18,11 +18,11 @@ export declare class TablesController {
         _id: import("mongoose").Types.ObjectId;
     }>>;
     findAll(paginationQuery: PaginationQueryDto, tableQuery: TableQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
@@ -36,22 +36,22 @@ export declare class TablesController {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>>;
-    update(id: string, updateTableDto: UpdateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+    update(id: string, updateTableDto: UpdateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}> & import("./schemas/table.schema").Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/table.schema").Table, {}, {}> & import("./schemas/table.schema").Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

@@ -5,11 +5,11 @@ export declare class Customer {
     tableNumber: number;
     refreshToken?: string;
 }
-export declare const CustomerSchema: mongoose.Schema<Customer, mongoose.Model<Customer, any, any, any, mongoose.Document<unknown, any, Customer, any> & Customer & {
+export declare const CustomerSchema: mongoose.Schema<Customer, mongoose.Model<Customer, any, any, any, mongoose.Document<unknown, any, Customer, any, {}> & Customer & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Customer, mongoose.Document<unknown, {}, mongoose.FlatRecord<Customer>, {}> & mongoose.FlatRecord<Customer> & {
+}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Customer, mongoose.Document<unknown, {}, mongoose.FlatRecord<Customer>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<Customer> & {
     _id: Types.ObjectId;
 } & {
     __v: number;

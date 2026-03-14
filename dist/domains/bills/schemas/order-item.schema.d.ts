@@ -6,11 +6,11 @@ export declare class OrderItem {
     createdAt?: string;
     updatedAt?: string;
 }
-export declare const OrderItemSchema: mongoose.Schema<OrderItem, mongoose.Model<OrderItem, any, any, any, mongoose.Document<unknown, any, OrderItem, any> & OrderItem & {
+export declare const OrderItemSchema: mongoose.Schema<OrderItem, mongoose.Model<OrderItem, any, any, any, mongoose.Document<unknown, any, OrderItem, any, {}> & OrderItem & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
-}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, OrderItem, mongoose.Document<unknown, {}, mongoose.FlatRecord<OrderItem>, {}> & mongoose.FlatRecord<OrderItem> & {
+}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, OrderItem, mongoose.Document<unknown, {}, mongoose.FlatRecord<OrderItem>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<OrderItem> & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;

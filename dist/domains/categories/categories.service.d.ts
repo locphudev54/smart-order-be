@@ -6,13 +6,13 @@ import { PaginationQueryDto } from 'core/query-string-dtos/pagination-query.dto'
 export declare class CategoriesService {
     private readonly categoryModel;
     constructor(categoryModel: Model<Category>);
-    create(createCategoryDto: CreateCategoryDto): Promise<import("mongoose").Document<unknown, {}, Category, {}> & Category & {
+    create(createCategoryDto: CreateCategoryDto): Promise<import("mongoose").Document<unknown, {}, Category, {}, {}> & Category & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }>;
     findAll(qs: PaginationQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, Category, {}> & Category & {
+        data: (import("mongoose").Document<unknown, {}, Category, {}, {}> & Category & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;

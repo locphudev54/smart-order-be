@@ -15,11 +15,11 @@ export declare class AccountsController {
         role: Role;
     }>;
     findAll(paginationQuery: PaginationQueryDto, tableQuery: AccountQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}> & import("./schemas/account.schema").Account & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}, {}> & import("./schemas/account.schema").Account & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}> & import("./schemas/account.schema").Account & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}, {}> & import("./schemas/account.schema").Account & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
@@ -33,11 +33,11 @@ export declare class AccountsController {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}> & import("./schemas/account.schema").Account & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}, {}> & import("./schemas/account.schema").Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}> & import("./schemas/account.schema").Account & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, import("./schemas/account.schema").Account, {}, {}> & import("./schemas/account.schema").Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

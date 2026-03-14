@@ -13,11 +13,11 @@ export declare class TablesService {
     private readonly jwtService;
     private readonly configService;
     constructor(tableModel: Model<TableDocument>, customersService: CustomersService, jwtService: JwtService, configService: ConfigService);
-    create(createTableDto: CreateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    create(createTableDto: CreateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -25,11 +25,11 @@ export declare class TablesService {
         _id: import("mongoose").Types.ObjectId;
     }>>;
     findAll(qs: PaginationQueryDto & TableQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
@@ -43,108 +43,108 @@ export declare class TablesService {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>>;
-    findByTableNumberList(numberList: number[]): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    findByTableNumberList(numberList: number[]): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>)[], import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }>)[], import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }, "find", {}>;
-    findByTableNumber(number: number): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    findByTableNumber(number: number): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }, "findOne", {}>;
-    findTableByToken(token: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    findTableByToken(token: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }, "findOne", {}>;
-    update(id: string, updateTableDto: UpdateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    update(id: string, updateTableDto: UpdateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>>;
-    updateByNumber(tableNumber: number, updateTableDto: UpdateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    updateByNumber(tableNumber: number, updateTableDto: UpdateTableDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Table, {}> & Table & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Table, {}, {}> & Table & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

@@ -9,7 +9,7 @@ import { OrdersService } from './orders.service';
 export declare class OrdersController {
     private readonly ordersService;
     constructor(ordersService: OrdersService);
-    create(createOrderDto: CreateOrderDto): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/order.schema").Order, {}> & import("./schemas/order.schema").Order & {
+    create(createOrderDto: CreateOrderDto): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/order.schema").Order, {}, {}> & import("./schemas/order.schema").Order & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -28,19 +28,19 @@ export declare class OrdersController {
         orders: import("./schemas/order.schema").Order[];
         statusCounts: Record<import("core/constants/enum").OrderStatus, number>;
     }[]>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("./schemas/order.schema").Order, {}> & import("./schemas/order.schema").Order & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("./schemas/order.schema").Order, {}, {}> & import("./schemas/order.schema").Order & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }>;
-    update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("mongoose").Document<unknown, {}, import("./schemas/order.schema").Order, {}> & import("./schemas/order.schema").Order & {
+    update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("mongoose").Document<unknown, {}, import("./schemas/order.schema").Order, {}, {}> & import("./schemas/order.schema").Order & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }>;
     removeBulk(body: DeleteBulkDto): Promise<import("mongodb").DeleteResult>;
     remove(id: string): Promise<import("mongodb").DeleteResult>;
-    checkout(customerId: string, account: AccountType): Promise<import("mongoose").Document<unknown, {}, import("../bills/schemas/bill.schema").Bill, {}> & import("../bills/schemas/bill.schema").Bill & {
+    checkout(customerId: string, account: AccountType): Promise<import("mongoose").Document<unknown, {}, import("../bills/schemas/bill.schema").Bill, {}, {}> & import("../bills/schemas/bill.schema").Bill & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

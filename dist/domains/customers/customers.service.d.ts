@@ -20,28 +20,28 @@ export declare class CustomersService {
     constructor(customerModel: Model<CustomerDocument>, ordersService: OrdersService, jwtService: JwtService, configService: ConfigService, tablesService: TablesService);
     create({ table }: {
         table: TableDocument;
-    }): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: Types.ObjectId;
     }>>;
-    createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType): Promise<(import("mongoose").Document<unknown, {}, import("../orders/schemas/order.schema").Order, {}> & import("../orders/schemas/order.schema").Order & {
+    createOrder(createOrderDto: CreateOrderByCustomerDto, customer: CustomerType): Promise<(import("mongoose").Document<unknown, {}, import("../orders/schemas/order.schema").Order, {}, {}> & import("../orders/schemas/order.schema").Order & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     })[]>;
     findAll(qs: PaginationQueryDto & DateRangeQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
             _id: Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
             _id: Types.ObjectId;
         } & {
             __v: number;
@@ -64,87 +64,87 @@ export declare class CustomersService {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: Types.ObjectId;
     }>>;
-    findByRefreshToken(refreshToken: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    findByRefreshToken(refreshToken: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: Types.ObjectId;
-    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     }, "findOne", {}>;
-    findByCode(code: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    findByCode(code: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: Types.ObjectId;
-    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     }, "findOne", {}>;
-    removeRefreshToken(id: string): import("mongoose").Query<import("mongoose").UpdateWriteOpResult, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    removeRefreshToken(id: string): import("mongoose").Query<import("mongoose").UpdateWriteOpResult, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }>, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     }, "updateOne", {}>;
-    validateCustomer(tableToken: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    validateCustomer(tableToken: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Customer, {}> & Customer & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Customer, {}, {}> & Customer & {
         _id: Types.ObjectId;
     } & {
         __v: number;

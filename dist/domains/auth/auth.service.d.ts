@@ -76,11 +76,11 @@ export declare class AuthService {
     updateProfile(updateProfileDto: UpdateProfileDto, account: AccountType): Promise<mongoose.UpdateWriteOpResult>;
     signAccessToken(payload: AccountType): Promise<string>;
     signRefreshToken(payload: AccountType, exp?: number): Promise<string>;
-    getUserFromAuthenticationToken(token: string): Promise<mongoose.Document<unknown, {}, mongoose.Document<unknown, {}, import("../accounts/schemas/account.schema").Account, {}> & import("../accounts/schemas/account.schema").Account & {
+    getUserFromAuthenticationToken(token: string): Promise<mongoose.Document<unknown, {}, mongoose.Document<unknown, {}, import("../accounts/schemas/account.schema").Account, {}, {}> & import("../accounts/schemas/account.schema").Account & {
         _id: mongoose.Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & mongoose.Document<unknown, {}, import("../accounts/schemas/account.schema").Account, {}> & import("../accounts/schemas/account.schema").Account & {
+    }, {}, {}> & mongoose.Document<unknown, {}, import("../accounts/schemas/account.schema").Account, {}, {}> & import("../accounts/schemas/account.schema").Account & {
         _id: mongoose.Types.ObjectId;
     } & {
         __v: number;

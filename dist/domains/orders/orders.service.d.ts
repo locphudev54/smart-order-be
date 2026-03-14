@@ -21,7 +21,7 @@ export declare class OrdersService {
     private readonly ordersGateway;
     private readonly dishesService;
     constructor(orderModel: Model<Order>, customersService: CustomersService, billsService: BillsService, tablesService: TablesService, ordersGateway: OrdersGateway, dishesService: DishesService);
-    create(createOrderDto: CreateOrderDto, fromCustomer?: boolean): Promise<(import("mongoose").Document<unknown, {}, Order, {}> & Order & {
+    create(createOrderDto: CreateOrderDto, fromCustomer?: boolean): Promise<(import("mongoose").Document<unknown, {}, Order, {}, {}> & Order & {
         _id: Types.ObjectId;
     } & {
         __v: number;
@@ -40,20 +40,20 @@ export declare class OrdersService {
         orders: Order[];
         statusCounts: Record<OrderStatus, number>;
     }[]>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, Order, {}> & Order & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, Order, {}, {}> & Order & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     }>;
     canTransitionStatus(current: OrderStatus, next: OrderStatus): boolean;
-    update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("mongoose").Document<unknown, {}, Order, {}> & Order & {
+    update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("mongoose").Document<unknown, {}, Order, {}, {}> & Order & {
         _id: Types.ObjectId;
     } & {
         __v: number;
     }>;
     remove(id: string): Promise<import("mongodb").DeleteResult>;
     removeBulk({ ids }: DeleteBulkDto): Promise<import("mongodb").DeleteResult>;
-    checkout(customerId: string, account: AccountType): Promise<import("mongoose").Document<unknown, {}, import("../bills/schemas/bill.schema").Bill, {}> & import("../bills/schemas/bill.schema").Bill & {
+    checkout(customerId: string, account: AccountType): Promise<import("mongoose").Document<unknown, {}, import("../bills/schemas/bill.schema").Bill, {}, {}> & import("../bills/schemas/bill.schema").Bill & {
         _id: Types.ObjectId;
     } & {
         __v: number;

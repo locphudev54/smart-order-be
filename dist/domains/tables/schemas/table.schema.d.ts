@@ -9,11 +9,11 @@ export declare class Table {
     reservationLink: string;
     token: string;
 }
-export declare const TableSchema: mongoose.Schema<Table, mongoose.Model<Table, any, any, any, mongoose.Document<unknown, any, Table, any> & Table & {
+export declare const TableSchema: mongoose.Schema<Table, mongoose.Model<Table, any, any, any, mongoose.Document<unknown, any, Table, any, {}> & Table & {
     _id: Types.ObjectId;
 } & {
     __v: number;
-}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Table, mongoose.Document<unknown, {}, mongoose.FlatRecord<Table>, {}> & mongoose.FlatRecord<Table> & {
+}, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, Table, mongoose.Document<unknown, {}, mongoose.FlatRecord<Table>, {}, mongoose.DefaultSchemaOptions> & mongoose.FlatRecord<Table> & {
     _id: Types.ObjectId;
 } & {
     __v: number;

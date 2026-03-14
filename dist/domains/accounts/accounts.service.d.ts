@@ -20,11 +20,11 @@ export declare class AccountsService {
         role: import("../../core/constants/enum").Role;
     }>;
     findAll(qs: PaginationQueryDto & AccountQueryDto): Promise<{
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
-        }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+        }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
             _id: import("mongoose").Types.ObjectId;
         } & {
             __v: number;
@@ -38,63 +38,63 @@ export declare class AccountsService {
             totalDocuments: number;
         };
     }>;
-    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>>;
-    findByEmail(email: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    findByEmail(email: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }, "findOne", {}>;
-    findByRefreshToken(refreshToken: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    findByRefreshToken(refreshToken: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }>, import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -102,11 +102,11 @@ export declare class AccountsService {
     findAccountByEmailAndPassword({ email, password }: {
         email: string;
         password: string;
-    }): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}> & import("mongoose").Document<unknown, {}, Account, {}> & Account & {
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Account, {}, {}> & Account & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
