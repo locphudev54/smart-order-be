@@ -46,7 +46,7 @@ import { ApiKeyGuard } from 'core/guards/api-key.guard'
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PORT: Joi.number().port().required(),
-        DATABASE_URI: Joi.string().required(),
+        DEVELOPMENT_DATABASE_URI: Joi.string().required(),
         EMPLOYEE_ACCESS_TOKEN_SECRET: Joi.string().required(),
         EMPLOYEE_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         EMPLOYEE_REFRESH_TOKEN_SECRET: Joi.string().required(),

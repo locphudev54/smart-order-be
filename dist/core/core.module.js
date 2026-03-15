@@ -45,7 +45,7 @@ exports.CoreModule = CoreModule = __decorate([
                 validationSchema: joi_1.default.object({
                     NODE_ENV: joi_1.default.string().valid('development', 'production', 'test', 'provision').required(),
                     PORT: joi_1.default.number().port().required(),
-                    DATABASE_URI: joi_1.default.string().required(),
+                    DEVELOPMENT_DATABASE_URI: joi_1.default.string().required(),
                     EMPLOYEE_ACCESS_TOKEN_SECRET: joi_1.default.string().required(),
                     EMPLOYEE_ACCESS_TOKEN_EXPIRATION_TIME: joi_1.default.string().required(),
                     EMPLOYEE_REFRESH_TOKEN_SECRET: joi_1.default.string().required(),
