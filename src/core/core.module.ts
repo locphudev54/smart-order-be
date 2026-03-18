@@ -17,29 +17,29 @@ import { ApiKeyGuard } from 'core/guards/api-key.guard'
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          ttl: 1000,
-          limit: 2
-        }
-        // {
-        //   name: 'short',
-        //   ttl: 1000,
-        //   limit: 2
-        // },
-        // {
-        //   name: 'medium',
-        //   ttl: 10000,
-        //   limit: 20
-        // },
-        // {
-        //   name: 'long',
-        //   ttl: 60000,
-        //   limit: 100
-        // }
-      ]
-    }),
+    // ThrottlerModule.forRoot({
+    //   throttlers: [
+    //     {
+    //       ttl: 1000,
+    //       limit: 2
+    //     }
+    //     // {
+    //     //   name: 'short',
+    //     //   ttl: 1000,
+    //     //   limit: 2
+    //     // },
+    //     // {
+    //     //   name: 'medium',
+    //     //   ttl: 10000,
+    //     //   limit: 20
+    //     // },
+    //     // {
+    //     //   name: 'long',
+    //     //   ttl: 60000,
+    //     //   limit: 100
+    //     // }
+    //   ]
+    // }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [environment, port, database, token, upload, client, server],
@@ -74,7 +74,7 @@ import { ApiKeyGuard } from 'core/guards/api-key.guard'
     CaslModule
   ],
   providers: [
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: ApiKeyGuard },
     {
       provide: APP_GUARD,

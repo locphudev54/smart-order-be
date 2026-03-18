@@ -23,7 +23,6 @@ const jwt_employee_auth_guard_1 = require("./guards/jwt-employee-auth.guard");
 const errors_exception_1 = require("./exceptions/errors.exception");
 const any_exception_filter_1 = __importDefault(require("./exceptions/any-exception-filter"));
 const roles_guard_1 = require("./guards/roles.guard");
-const throttler_1 = require("@nestjs/throttler");
 const api_key_guard_1 = require("./guards/api-key.guard");
 let CoreModule = class CoreModule {
 };
@@ -31,14 +30,6 @@ exports.CoreModule = CoreModule;
 exports.CoreModule = CoreModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            throttler_1.ThrottlerModule.forRoot({
-                throttlers: [
-                    {
-                        ttl: 1000,
-                        limit: 2
-                    }
-                ]
-            }),
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
                 load: [config_2.environment, config_2.port, config_2.database, config_2.token, config_2.upload, config_2.client, config_2.server],
@@ -73,7 +64,6 @@ exports.CoreModule = CoreModule = __decorate([
             casl_module_1.CaslModule
         ],
         providers: [
-            { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },
             { provide: core_1.APP_GUARD, useClass: api_key_guard_1.ApiKeyGuard },
             {
                 provide: core_1.APP_GUARD,

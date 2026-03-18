@@ -116,7 +116,6 @@ __decorate([
 __decorate([
     (0, customer_route_decorator_1.CustomerRoute)(),
     (0, common_1.Post)('auth/logout'),
-    (0, common_1.UseGuards)(local_customer_auth_guard_1.LocalCustomerAuthGuard),
     (0, response_message_decorator_1.ResponseMessage)('Đăng xuất thành công'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),

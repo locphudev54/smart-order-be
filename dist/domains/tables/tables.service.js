@@ -44,11 +44,11 @@ let TablesService = class TablesService {
         const sortField = sortQuery?.split('.')?.[0];
         const sort = sortQuery?.split('.')?.[1] === 'desc' ? `-${sortField}` : sortField;
         const query = this.tableModel.find(filter).populate({ path: 'customer', select: ['_id', 'code'] });
+        if (sort) {
+            query.sort(sort);
+        }
         if (limit && page) {
-            query
-                .skip((page - 1) * limit)
-                .limit(limit)
-                .sort(sort);
+            query.skip((page - 1) * limit).limit(limit);
         }
         const [data, totalDocuments] = await Promise.all([query, this.tableModel.countDocuments(filter)]);
         return {
